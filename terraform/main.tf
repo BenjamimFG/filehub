@@ -12,6 +12,16 @@ provider "aws" {
   region = "us-east-1"
 }
 
+# Bucket creation
+resource "aws_s3_bucket" "s3_bucket"{
+  bucket = "filehub-bucket-trabalho-unifor"
+
+  tags = {
+    "filehub": ""
+  }
+}
+
+# DB
 resource "aws_db_instance" "default" {
   instance_class = "db.t3.micro"
   engine               = "postgres"
@@ -22,7 +32,9 @@ resource "aws_db_instance" "default" {
   allocated_storage = 10
   skip_final_snapshot = true
 
-  tags = ["filehub"]
+  tags = {
+    "filehub": ""
+  }
 }
 
 #   ami           = data.aws_ami.ubuntu.id
