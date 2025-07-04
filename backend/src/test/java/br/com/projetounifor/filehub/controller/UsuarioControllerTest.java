@@ -88,7 +88,7 @@ class UsuarioControllerTest {
 		when(usuarioService.buscarPorId(id)).thenReturn(usuario);
 
 		// Act & Assert
-		mockMvc.perform(get("/usuarios/{id}", id).contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
+		mockMvc.perform(get("/usuarios/id/{id}", id).contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.id").value(id)).andExpect(jsonPath("$.nome").value("Test User"))
 				.andExpect(jsonPath("$.username").value("testuser"))
 				.andExpect(jsonPath("$.email").value("test@example.com"));
