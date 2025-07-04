@@ -62,6 +62,7 @@ jobs:
           host: ${{ secrets.API_URL }}
           username: ubuntu
           key: ${{ secrets.EC2_PRIVATE_KEY }}
+          passphrase: ${{ secrets.EC2_PRIVATE_KEY_PW }}
           script: |
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
             sudo docker stop filehub-api
