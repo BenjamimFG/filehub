@@ -1,4 +1,3 @@
-// src/pages/Login.tsx
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,15 +14,12 @@ import { KeyRound, Loader2 } from 'lucide-react';
 import CryptoJS from 'crypto-js';
 
 // Chave de criptografia. EM UM PROJETO REAL, ISSO NUNCA DEVE SER ARMAZENADO NO CÓDIGO!
-// O ideal é que venha de uma variável de ambiente, mas mesmo assim, a criptografia no frontend
-// é considerada "segurança por obscuridade", não segurança real.
-const ENCRYPTION_KEY = process.env.VITE_ENCRYPTION_KEY || 'default-super-secret-key-for-dev';
+// O ideal é que venha de uma variável de ambiente.
+// CORREÇÃO: Vite usa `import.meta.env` para acessar variáveis de ambiente, não `process.env`.
+const ENCRYPTION_KEY = import.meta.env.VITE_ENCRYPTION_KEY || 'default-super-secret-key-for-dev';
 
 
 const Login: React.FC = () => {
-
-  debugger;
-  
   const [username, setUsername] = useState('');
   const [senha, setSenha] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -51,7 +47,9 @@ const Login: React.FC = () => {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.message || 'Falha ao autenticar. Verifique suas credenciais.');
+        // Tenta pegar uma mensagem de erro mais específica da API, se houver
+        const errorMessage = data?.message || data?.error || 'Falha ao autenticar. Verifique suas credenciais.';
+        throw new Error(errorMessage);
       }
 
       if (data.token) {
@@ -59,11 +57,10 @@ const Login: React.FC = () => {
         // Criptografando o token antes de salvar no localStorage.
         const encryptedToken = CryptoJS.AES.encrypt(data.token, ENCRYPTION_KEY).toString();
         
-        // Usamos localStorage para persistir entre sessões. sessionStorage seria limpo ao fechar a aba.
+        // Usamos localStorage para persistir entre sessões.
         localStorage.setItem('authToken', encryptedToken);
 
         // Redireciona para o dashboard após o login
-        // Em um app com react-router-dom, você usaria: navigate('/dashboard');
         window.location.href = '/dashboard';
 
       } else {
@@ -96,7 +93,7 @@ const Login: React.FC = () => {
               <Input
                 id="username"
                 type="text"
-                placeholder="seu.usuario"
+                placeholder="Usuario"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -137,49 +134,3 @@ const Login: React.FC = () => {
 };
 
 export default Login;
-
-/**
- * =========================================================================
- * NOTA IMPORTANTE SOBRE SEGURANÇA DO TOKEN
- * =========================================================================
- * * 1.  **Criptografia no Frontend:** A criptografia do token no frontend, como 
- * feita aqui com `crypto-js`, é considerada **Segurança por Obscuridade**.
- * Ela dificulta, mas não impede que um invasor com acesso ao código-fonte
- * (que é todo o código do frontend) encontre a chave e descriptografe o token.
- * * 2.  **Melhor Prática (HttpOnly Cookies):** A forma mais segura de lidar com
- * tokens de autenticação é através de **cookies `HttpOnly`**.
- * - O **servidor**, ao autenticar o usuário, define o cookie na resposta.
- * - A flag `HttpOnly` impede que o JavaScript do navegador acesse o cookie.
- * Isso mitiga drasticamente o risco de roubo de token por ataques XSS.
- * - O navegador envia automaticamente o cookie em todas as requisições
- * subsequentes para a API.
- * - Neste caso, o frontend não precisaria armazenar o token manualmente.
- *
- * 3.  **Como Ler o Token para a API:** Para usar o token armazenado, você precisará
- * descriptografá-lo antes de cada chamada à API.
- *
- * ```typescript
- * function getAuthToken() {
- * const encryptedToken = localStorage.getItem('authToken');
- * if (!encryptedToken) return null;
- *
- * try {
- * const bytes = CryptoJS.AES.decrypt(encryptedToken, ENCRYPTION_KEY);
- * const originalToken = bytes.toString(CryptoJS.enc.Utf8);
- * return originalToken;
- * } catch (error) {
- * console.error("Failed to decrypt token:", error);
- * return null;
- * }
- * }
- *
- * // Exemplo de uso em uma chamada fetch:
- * const token = getAuthToken();
- * fetch('[http://api.example.com/data](http://api.example.com/data)', {
- * headers: {
- * 'Authorization': `Bearer ${token}`
- * }
- * })
- * ```
- * =========================================================================
- */

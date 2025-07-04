@@ -18,4 +18,5 @@ public class SecurityBeansConfig {
 		return username -> usuarioRepository.findByUsername(username)
 				.orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
 	}
+	
 }
