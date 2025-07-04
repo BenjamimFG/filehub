@@ -118,4 +118,62 @@ public class ProjetoController {
         projetoService.deletar(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PatchMapping("/{id}/membros/{usuarioId}")
+    @Operation(summary = "Adiciona membro ao projeto", description = "Inclui um novo usuário na lista de membros do projeto.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Membro adicionado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Projeto ou usuário não encontrado")
+    })
+    public ResponseEntity<Projeto> adicionarMembro(
+            @PathVariable Long id,
+            @PathVariable Long usuarioId
+    ) {
+        Projeto projetoAtualizado = projetoService.adicionarMembro(id, usuarioId);
+        return ResponseEntity.ok(projetoAtualizado);
+    }
+
+    @DeleteMapping("/{id}/membros/{usuarioId}")
+    @Operation(summary = "Remove membro do projeto", description = "Remove um usuário da lista de membros do projeto.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Membro removido com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Projeto ou usuário não encontrado")
+    })
+    public ResponseEntity<Projeto> removerMembro(
+            @PathVariable Long id,
+            @PathVariable Long usuarioId
+    ) {
+        Projeto projetoAtualizado = projetoService.removerMembro(id, usuarioId);
+        return ResponseEntity.ok(projetoAtualizado);
+    }
+
+    @PatchMapping("/{id}/aprovadores/{usuarioId}")
+    @Operation(summary = "Adiciona aprovador ao projeto", description = "Adiciona um usuário como aprovador do projeto.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Aprovador adicionado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Projeto ou usuário não encontrado")
+    })
+    public ResponseEntity<Projeto> adicionarAprovador(
+            @PathVariable Long id,
+            @PathVariable Long usuarioId
+    ) {
+        Projeto projetoAtualizado = projetoService.adicionarAprovador(id, usuarioId);
+        return ResponseEntity.ok(projetoAtualizado);
+    }
+
+    @DeleteMapping("/{id}/aprovadores/{usuarioId}")
+    @Operation(summary = "Remove aprovador do projeto", description = "Remove um usuário da lista de aprovadores do projeto.")
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Aprovador removido com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Projeto ou usuário não encontrado")
+    })
+    public ResponseEntity<Projeto> removerAprovador(
+            @PathVariable Long id,
+            @PathVariable Long usuarioId
+    ) {
+        Projeto projetoAtualizado = projetoService.removerAprovador(id, usuarioId);
+        return ResponseEntity.ok(projetoAtualizado);
+    }
+
+
 }

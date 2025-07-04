@@ -68,4 +68,43 @@ public class ProjetoService {
         }
         projetoRepository.deleteById(id);
     }
+
+    public Projeto adicionarMembro(Long projetoId, Long usuarioId) {
+        Projeto projeto = projetoRepository.findById(projetoId)
+                .orElseThrow(() -> new RuntimeException("Projeto não encontrado"));
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        projeto.getUsuarios().add(usuario);
+        projeto.getAprovadores().remove(usuario);
+        return projetoRepository.save(projeto);
+    }
+
+    public Projeto removerMembro(Long projetoId, Long usuarioId) {
+        Projeto projeto = projetoRepository.findById(projetoId)
+                .orElseThrow(() -> new RuntimeException("Projeto não encontrado"));
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        projeto.getUsuarios().remove(usuario);
+        return projetoRepository.save(projeto);
+    }
+
+    public Projeto adicionarAprovador(Long projetoId, Long usuarioId) {
+        Projeto projeto = projetoRepository.findById(projetoId)
+                .orElseThrow(() -> new RuntimeException("Projeto não encontrado"));
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        projeto.getAprovadores().add(usuario);
+        projeto.getUsuarios().remove(usuario);
+        return projetoRepository.save(projeto);
+    }
+
+    public Projeto removerAprovador(Long projetoId, Long usuarioId) {
+        Projeto projeto = projetoRepository.findById(projetoId)
+                .orElseThrow(() -> new RuntimeException("Projeto não encontrado"));
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+        projeto.getAprovadores().remove(usuario);
+        return projetoRepository.save(projeto);
+    }
+
 }
