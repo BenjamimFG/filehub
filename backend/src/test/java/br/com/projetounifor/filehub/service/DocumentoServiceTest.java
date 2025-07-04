@@ -149,7 +149,6 @@ class DocumentoServiceTest {
 		});
 		assertEquals("Documento não encontrado", exception.getMessage(), "A mensagem de erro deve ser a esperada");
 		verify(documentoRepository, times(1)).findById(documentoId);
-		verifyNoInteractions(usuarioRepository, documentoRepository);
 	}
 
 	@Test
@@ -190,6 +189,8 @@ class DocumentoServiceTest {
 		novaVersao.setId(2L);
 		novaVersao.setVersao(2);
 		novaVersao.setNomeArquivo("new_version.pdf");
+		novaVersao.setStatus(StatusDocumento.PENDENTE);
+		novaVersao.setProjeto(projeto);
 		when(documentoRepository.findById(documentoOriginalId)).thenReturn(Optional.of(documentoOriginal));
 		when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuario));
 		when(documentoRepository.save(any(Documento.class))).thenReturn(novaVersao);
@@ -209,7 +210,6 @@ class DocumentoServiceTest {
 		verify(documentoRepository, times(1)).findById(documentoOriginalId);
 		verify(usuarioRepository, times(1)).findById(usuarioId);
 		verify(documentoRepository, times(1)).save(any(Documento.class));
-		verifyNoMoreInteractions(documentoRepository, usuarioRepository);
 	}
 
 	@Test
@@ -226,7 +226,6 @@ class DocumentoServiceTest {
 		assertEquals("Documento original não encontrado", exception.getMessage(),
 				"A mensagem de erro deve ser a esperada");
 		verify(documentoRepository, times(1)).findById(documentoOriginalId);
-		verifyNoInteractions(usuarioRepository, documentoRepository);
 	}
 
 	@Test

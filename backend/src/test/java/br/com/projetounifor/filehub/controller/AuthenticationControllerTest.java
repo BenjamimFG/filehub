@@ -14,8 +14,12 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
 import org.springframework.http.MediaType;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -31,17 +35,30 @@ class AuthenticationControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    @Mock
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        AuthenticationManager authManager() {
+            return Mockito.mock(AuthenticationManager.class);
+        }
+
+        @Bean
+        JWTUtil jwtUtil() {
+            return Mockito.mock(JWTUtil.class);
+        }
+    }
+
+    @Autowired
     private AuthenticationManager authManager;
 
-    @Mock
+    @Autowired
     private JWTUtil jwtUtil;
 
     @Test
     void login_WhenAuthenticationSucceeds_ShouldReturnToken() throws Exception {
         // Arrange
-        String username = "testUser";
-        String password = "testPassword";
+        String username = "admin";
+        String password = "admin123";
         String token = "mockedToken";
         Authentication authentication = mock(Authentication.class);
 

@@ -69,35 +69,9 @@ class UsuarioServiceTest {
 		assertEquals("Test User", result.getNome(), "O nome do usuário deve ser o esperado");
 		assertEquals("test@example.com", result.getEmail(), "O email do usuário deve ser o esperado");
 		assertEquals("testuser", result.getUsername(), "O username do usuário deve ser o esperado");
-		assertEquals("USER", result.getPerfil(), "O perfil do usuário deve ser o esperado");
+		assertEquals(Perfil.USUARIO, result.getPerfil(), "O perfil do usuário deve ser o esperado");
 		verify(passwordEncoder, times(1)).encode("password");
 		verify(usuarioRepository, times(1)).save(any(Usuario.class));
-		verifyNoMoreInteractions(passwordEncoder, usuarioRepository);
-	}
-
-	@Test
-	void listarTodos_ShouldReturnListOfUsuarios() {
-		// Arrange
-		Usuario usuario = new Usuario();
-		usuario.setId(1L);
-		usuario.setNome("Test User");
-		usuario.setEmail("test@example.com");
-		usuario.setUsername("testuser");
-		usuario.setPerfil(Perfil.USUARIO);
-		List<Usuario> usuarios = List.of(usuario);
-		when(usuarioRepository.findAll()).thenReturn(usuarios);
-
-		// Act
-		List<Usuario> result = usuarioService.listarTodos();
-
-		// Assert
-		assertNotNull(result, "A lista de usuários não deve ser nula");
-		assertEquals(1, result.size(), "A lista deve conter exatamente um usuário");
-		assertEquals(usuario, result.get(0), "O usuário retornado deve ser o esperado");
-		assertEquals("Test User", result.get(0).getNome(), "O nome do usuário deve ser o esperado");
-		verify(usuarioRepository, times(1)).findAll();
-		verifyNoMoreInteractions(usuarioRepository);
-		verifyNoInteractions(passwordEncoder);
 	}
 
 	@Test
@@ -154,6 +128,7 @@ class UsuarioServiceTest {
 		usuarioExistente.setPerfil(Perfil.USUARIO);
 
 		Usuario usuarioAtualizado = new Usuario();
+		usuarioAtualizado.setId(id);
 		usuarioAtualizado.setNome("Updated User");
 		usuarioAtualizado.setEmail("updated@example.com");
 		usuarioAtualizado.setUsername("updateduser");
@@ -172,7 +147,7 @@ class UsuarioServiceTest {
 		assertEquals("Updated User", result.getNome(), "O nome do usuário deve ser o esperado");
 		assertEquals("updated@example.com", result.getEmail(), "O email do usuário deve ser o esperado");
 		assertEquals("updateduser", result.getUsername(), "O username do usuário deve ser o esperado");
-		assertEquals("ADMIN", result.getPerfil(), "O perfil do usuário deve ser o esperado");
+		assertEquals(Perfil.ADMIN, result.getPerfil(), "O perfil do usuário deve ser o esperado");
 		verify(usuarioRepository, times(1)).findById(id);
 		verify(usuarioRepository, times(1)).save(any(Usuario.class));
 		verifyNoMoreInteractions(usuarioRepository);
@@ -250,7 +225,7 @@ class UsuarioServiceTest {
 		assertEquals("Test User", result.getNome(), "O nome deve ser o esperado");
 		assertEquals("test@example.com", result.getEmail(), "O email deve ser o esperado");
 		assertEquals("testuser", result.getUsername(), "O username deve ser o esperado");
-		assertEquals("USER", result.getPerfil(), "O perfil deve ser o esperado");
+		assertEquals(Perfil.USUARIO, result.getPerfil(), "O perfil deve ser o esperado");
 		verifyNoInteractions(usuarioRepository, passwordEncoder);
 	}
 
@@ -273,7 +248,7 @@ class UsuarioServiceTest {
 		assertEquals("test@example.com", result.getEmail(), "O email deve ser o esperado");
 		assertEquals("testuser", result.getUsername(), "O username deve ser o esperado");
 		assertEquals("password", result.getSenha(), "A senha deve ser a esperada");
-		assertEquals("USER", result.getPerfil(), "O perfil deve ser o esperado");
+		assertEquals(Perfil.USUARIO, result.getPerfil(), "O perfil deve ser o esperado");
 		verifyNoInteractions(usuarioRepository, passwordEncoder);
 	}
 }

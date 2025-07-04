@@ -2,6 +2,7 @@ package br.com.projetounifor.filehub.service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -28,8 +29,11 @@ public class UsuarioService {
     }
 
     // Buscar todos os usuários
-    public List<Usuario> listarTodos() {
-        return usuarioRepository.findAll();
+    public List<UsuarioDTO> listarTodos() {
+            return usuarioRepository.findAll()
+                    .stream()
+                    .map(this::toDTO)
+                    .collect(Collectors.toList());
     }
 
     // Buscar usuário por ID

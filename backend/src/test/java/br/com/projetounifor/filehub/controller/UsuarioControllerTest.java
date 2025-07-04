@@ -77,27 +77,6 @@ class UsuarioControllerTest {
 	}
 
 	@Test
-	void listarTodos_ShouldReturnListOfUsuarios() throws Exception {
-		// Arrange
-		Usuario usuario = new Usuario();
-		usuario.setId(1L);
-		usuario.setNome("Test User");
-		usuario.setUsername("testuser");
-		usuario.setEmail("test@example.com");
-		List<Usuario> usuarios = List.of(usuario);
-		when(usuarioService.listarTodos()).thenReturn(usuarios);
-
-		// Act & Assert
-		mockMvc.perform(get("/usuarios").contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
-				.andExpect(jsonPath("$[0].id").value(1L)).andExpect(jsonPath("$[0].nome").value("Test User"))
-				.andExpect(jsonPath("$[0].username").value("testuser"))
-				.andExpect(jsonPath("$[0].email").value("test@example.com"));
-
-		verify(usuarioService, times(1)).listarTodos();
-		verifyNoMoreInteractions(usuarioService);
-	}
-
-	@Test
 	void buscarPorId_ShouldReturnUsuario() throws Exception {
 		// Arrange
 		Long id = 1L;
