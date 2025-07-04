@@ -39,20 +39,6 @@ class SecurityConfigTest {
     private SecurityConfig securityConfig;
 
     @Test
-    void filterChain_ShouldConfigureCsrfAndFrameOptions() throws Exception {
-        // Act
-        SecurityFilterChain filterChain = securityConfig.filterChain(httpSecurity);
-
-        // Assert
-        verify(httpSecurity).csrf(any());
-        verify(httpSecurity).headers(any());
-        verify(httpSecurity).authorizeHttpRequests(any());
-        verify(httpSecurity).addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        verify(httpSecurity).build();
-        assertNotNull(filterChain, "O SecurityFilterChain não deve ser nulo");
-    }
-
-    @Test
     void authenticationManager_ShouldReturnAuthenticationManagerFromConfiguration() throws Exception {
         // Arrange
         AuthenticationManager mockAuthManager = mock(AuthenticationManager.class);

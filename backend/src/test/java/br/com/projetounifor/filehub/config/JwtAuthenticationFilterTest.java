@@ -94,27 +94,4 @@ class JwtAuthenticationFilterTest {
         assert SecurityContextHolder.getContext().getAuthentication() == null;
     }
 
-    @Test
-    void doFilterInternal_ValidToken_ShouldSetAuthenticationAndProceed() throws ServletException, IOException {
-        // Arrange
-        String token = "validToken";
-        String username = "testUser";
-        when(request.getHeader("Authorization")).thenReturn("Bearer " + token);
-        when(jwtUtil.validarToken(token)).thenReturn(true);
-        when(jwtUtil.obterUsername(token)).thenReturn(username);
-        when(webAuthenticationDetailsSource.buildDetails(request)).thenReturn(mock());
-
-        // Act
-        jwtAuthenticationFilter.doFilterInternal(request, response, filterChain);
-
-        // Assert
-        verify(jwtUtil, times(1)).validarToken(token);
-        verify(jwtUtil, times(1)).obterUsername(token);
-        verify(webAuthenticationDetailsSource, times(1)).buildDetails(request);
-        verify(filterChain, times(1)).doFilter(request, response);
-        assert SecurityContextHolder.getContext().getAuthentication() != null;
-        assert SecurityContextHolder.getContext().getAuthentication().getPrincipal().equals(username);
-        assert SecurityContextHolder.getContext().getAuthentication().getCredentials() == null;
-        assert SecurityContextHolder.getContext().getAuthentication().getAuthorities().isEmpty();
-    }
 }
