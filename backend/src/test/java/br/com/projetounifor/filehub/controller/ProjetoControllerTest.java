@@ -17,6 +17,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
+import br.com.projetounifor.filehub.dto.ProjetoResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +31,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.projetounifor.filehub.domain.model.Projeto;
-import br.com.projetounifor.filehub.dto.ProjetoDTO;
+import br.com.projetounifor.filehub.dto.ProjetoRequestDTO;
 import br.com.projetounifor.filehub.service.ProjetoService;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,8 +57,8 @@ class ProjetoControllerTest {
 	@Test
 	void criar_ShouldCreateProjetoAndReturnCreatedStatus() throws Exception {
 		// Arrange
-		ProjetoDTO dto = new ProjetoDTO("Projeto Teste", 1L, List.of(2L), List.of(3L));
-		Projeto projeto = new Projeto();
+		ProjetoRequestDTO dto = new ProjetoRequestDTO("Projeto Teste", 1L, List.of(2L), List.of(3L));
+		ProjetoResponseDTO projeto = new ProjetoResponseDTO();
 		projeto.setId(1L);
 		projeto.setNome("Projeto Teste");
 		when(projetoService.criarProjeto(eq("Projeto Teste"), eq(1L), any(List.class), any(List.class)))
@@ -77,10 +78,10 @@ class ProjetoControllerTest {
 	@Test
 	void listarTodos_ShouldReturnListOfProjetos() throws Exception {
 		// Arrange
-		Projeto projeto = new Projeto();
+		ProjetoResponseDTO projeto = new ProjetoResponseDTO();
 		projeto.setId(1L);
 		projeto.setNome("Projeto Teste");
-		List<Projeto> projetos = List.of(projeto);
+		List<ProjetoResponseDTO> projetos = List.of(projeto);
 		when(projetoService.listarTodos()).thenReturn(projetos);
 
 		// Act & Assert
@@ -95,16 +96,16 @@ class ProjetoControllerTest {
 	void buscarPorId_ShouldReturnProjeto() throws Exception {
 		// Arrange
 		Long id = 1L;
-		Projeto projeto = new Projeto();
+		ProjetoResponseDTO projeto = new ProjetoResponseDTO();
 		projeto.setId(id);
 		projeto.setNome("Projeto Teste");
-		when(projetoService.buscarPorId(id)).thenReturn(projeto);
+		when(projetoService.buscarPorIdDTO(id)).thenReturn(projeto);
 
 		// Act & Assert
 		mockMvc.perform(get("/projetos/{id}", id).contentType(MediaType.APPLICATION_JSON)).andExpect(status().isOk())
 				.andExpect(jsonPath("$.id").value(id)).andExpect(jsonPath("$.nome").value("Projeto Teste"));
 
-		verify(projetoService, times(1)).buscarPorId(id);
+		verify(projetoService, times(1)).buscarPorIdDTO(id);
 		verifyNoMoreInteractions(projetoService);
 	}
 
@@ -112,8 +113,8 @@ class ProjetoControllerTest {
 	void atualizar_ShouldUpdateProjetoAndReturnOk() throws Exception {
 		// Arrange
 		Long id = 1L;
-		ProjetoDTO dto = new ProjetoDTO("Projeto Atualizado", 1L, List.of(2L), List.of(3L));
-		Projeto projeto = new Projeto();
+		ProjetoRequestDTO dto = new ProjetoRequestDTO("Projeto Atualizado", 1L, List.of(2L), List.of(3L));
+		ProjetoResponseDTO projeto = new ProjetoResponseDTO();
 		projeto.setId(id);
 		projeto.setNome("Projeto Atualizado");
 		when(projetoService.atualizar(eq(id), eq("Projeto Atualizado"), eq(1L), any(List.class), any(List.class)))

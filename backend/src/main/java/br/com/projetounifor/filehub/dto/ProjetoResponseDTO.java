@@ -9,7 +9,8 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProjetoDTO {
+public class ProjetoResponseDTO {
+    private Long id;
     private String nome;
     private Long criadorId;
     private List<Long> usuariosIds;
