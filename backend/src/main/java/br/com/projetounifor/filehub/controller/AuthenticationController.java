@@ -1,5 +1,7 @@
 package br.com.projetounifor.filehub.controller;
 
+import br.com.projetounifor.filehub.domain.model.Usuario;
+import br.com.projetounifor.filehub.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -24,6 +26,7 @@ public class AuthenticationController {
 
     private final AuthenticationManager authManager;
     private final JWTUtil jwtUtil;
+    private final UsuarioService usuarioService;
 
     @PostMapping("/login")
     @Operation(
@@ -43,8 +46,8 @@ public class AuthenticationController {
         try {
             var authenticationToken = new UsernamePasswordAuthenticationToken(login.username(), login.senha());
             authManager.authenticate(authenticationToken);
-
-            var token = jwtUtil.gerarToken(login.username());
+            Usuario usuario = usuarioService.buscarPorUsername(login.username());
+            var token = jwtUtil.gerarToken(login.username(), usuario.getPerfil().name(), usuario.getId());
             return ResponseEntity.ok(new LoginResponse(token));
         } catch (AuthenticationException e) {
             return ResponseEntity.status(401).body("Usuário ou senha inválidos");

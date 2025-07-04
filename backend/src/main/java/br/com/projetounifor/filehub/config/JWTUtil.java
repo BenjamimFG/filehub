@@ -17,9 +17,11 @@ public class JWTUtil {
     private final long EXPIRATION_TIME = 86400000;
 
     // gerar token
-    public String gerarToken(String username) {
+    public String gerarToken(String username, String role, Long id) {
         return Jwts.builder()
                 .setSubject(username)
+                .claim("id", id)
+                .claim("role", role)
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(secretKey)
                 .compact();

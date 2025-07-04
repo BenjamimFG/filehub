@@ -69,6 +69,22 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.buscarPorId(id));
     }
 
+    @GetMapping("/{username}")
+    @Operation(
+            summary = "Busca usuário por Username",
+            description = "Retorna os dados do usuário correspondente ao Username fornecido."
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Usuário encontrado com sucesso"),
+            @ApiResponse(responseCode = "404", description = "Usuário não encontrado")
+    })
+    public ResponseEntity<Usuario> buscarPorUsername(
+            @Parameter(description = "Username do usuário a ser buscado", example = "admin")
+            @PathVariable String username
+    ) {
+        return ResponseEntity.ok(usuarioService.buscarPorUsername(username));
+    }
+
     @PutMapping("/{id}")
     @Operation(
             summary = "Atualiza dados de um usuário",

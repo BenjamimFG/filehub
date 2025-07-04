@@ -84,4 +84,8 @@ public class UsuarioService {
         return usuario;
     }
 
+    public Usuario buscarPorUsername(String username) {
+        return usuarioRepository.findByUsername(username)
+                .orElseThrow(() -> new NoSuchElementException("Usuário não encontrado com username: " + username));
+    }
 }
