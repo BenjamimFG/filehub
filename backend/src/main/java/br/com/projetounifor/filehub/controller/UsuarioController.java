@@ -3,11 +3,12 @@ package br.com.projetounifor.filehub.controller;
 import java.net.URI;
 import java.util.List;
 
+import br.com.projetounifor.filehub.dto.UsuarioRequestDTO;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import br.com.projetounifor.filehub.domain.model.Usuario;
-import br.com.projetounifor.filehub.dto.UsuarioDTO;
+import br.com.projetounifor.filehub.dto.UsuarioResponseDTO;
 import br.com.projetounifor.filehub.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -34,11 +35,11 @@ public class UsuarioController {
             @ApiResponse(responseCode = "400", description = "Dados inválidos"),
             @ApiResponse(responseCode = "409", description = "Usuário já existe")
     })
-    public ResponseEntity<UsuarioDTO> cadastrar(
+    public ResponseEntity<UsuarioResponseDTO> cadastrar(
             @Parameter(description = "Dados do novo usuário")
-            @RequestBody UsuarioDTO usuarioDTO
+            @RequestBody UsuarioRequestDTO usuarioRequestDTO
     ) {
-        UsuarioDTO criado = usuarioService.cadastrar(usuarioDTO);
+        UsuarioResponseDTO criado = usuarioService.cadastrar(usuarioRequestDTO);
         URI uri = URI.create("/usuarios/" + criado.getId());
         return ResponseEntity.created(uri).body(criado);
     }
@@ -49,7 +50,7 @@ public class UsuarioController {
             description = "Retorna uma lista com todos os usuários cadastrados no sistema."
     )
     @ApiResponse(responseCode = "200", description = "Lista de usuários retornada com sucesso")
-    public ResponseEntity<List<UsuarioDTO>> listarTodos() {
+    public ResponseEntity<List<UsuarioResponseDTO>> listarTodos() {
         return ResponseEntity.ok(usuarioService.listarTodos());
     }
 

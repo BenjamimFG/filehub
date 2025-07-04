@@ -47,10 +47,10 @@ public class AuthenticationController {
             LoginRequest login
     ) {
         try {
-            var authenticationToken = new UsernamePasswordAuthenticationToken(login.username(), login.senha());
+            var authenticationToken = new UsernamePasswordAuthenticationToken(login.username().toUpperCase(), login.senha());
             authManager.authenticate(authenticationToken);
 
-            Usuario usuario = usuarioService.buscarPorUsername(login.username());
+            Usuario usuario = usuarioService.buscarPorUsername(login.username().toUpperCase());
             var token = jwtUtil.gerarToken(login.username(), usuario.getPerfil().name(), usuario.getId());
 
             // Mapeando IDs dos repositórios

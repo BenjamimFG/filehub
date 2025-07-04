@@ -11,10 +11,10 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import br.com.projetounifor.filehub.dto.UsuarioRequestDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +25,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import br.com.projetounifor.filehub.domain.model.Usuario;
 import br.com.projetounifor.filehub.domain.model.enums.Perfil;
 import br.com.projetounifor.filehub.domain.repository.UsuarioRepository;
-import br.com.projetounifor.filehub.dto.UsuarioDTO;
+import br.com.projetounifor.filehub.dto.UsuarioResponseDTO;
 
 @ExtendWith(MockitoExtension.class)
 class UsuarioServiceTest {
@@ -42,7 +42,7 @@ class UsuarioServiceTest {
 	@Test
 	void cadastrar_ShouldCreateAndSaveUsuario() {
 		// Arrange
-		UsuarioDTO dto = new UsuarioDTO();
+		UsuarioRequestDTO dto = new UsuarioRequestDTO();
 		dto.setNome("Test User");
 		dto.setEmail("test@example.com");
 		dto.setUsername("testuser");
@@ -61,7 +61,7 @@ class UsuarioServiceTest {
 		when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
 
 		// Act
-		UsuarioDTO result = usuarioService.cadastrar(dto);
+		UsuarioResponseDTO result = usuarioService.cadastrar(dto);
 
 		// Assert
 		assertNotNull(result, "O UsuarioDTO retornado não deve ser nulo");
@@ -217,7 +217,7 @@ class UsuarioServiceTest {
 		usuario.setPerfil(Perfil.USUARIO);
 
 		// Act
-		UsuarioDTO result = usuarioService.toDTO(usuario);
+		UsuarioResponseDTO result = usuarioService.toDTO(usuario);
 
 		// Assert
 		assertNotNull(result, "O UsuarioDTO não deve ser nulo");
@@ -232,7 +232,7 @@ class UsuarioServiceTest {
 	@Test
 	void fromDTO_ShouldConvertDTOToUsuario() {
 		// Arrange
-		UsuarioDTO dto = new UsuarioDTO();
+		UsuarioRequestDTO dto = new UsuarioRequestDTO();
 		dto.setNome("Test User");
 		dto.setEmail("test@example.com");
 		dto.setUsername("testuser");
@@ -240,7 +240,7 @@ class UsuarioServiceTest {
 		dto.setPerfil(Perfil.USUARIO);
 
 		// Act
-		Usuario result = usuarioService.fromDTO(dto);
+		Usuario result = usuarioService.fromResquestDTO(dto);
 
 		// Assert
 		assertNotNull(result, "O usuário não deve ser nulo");

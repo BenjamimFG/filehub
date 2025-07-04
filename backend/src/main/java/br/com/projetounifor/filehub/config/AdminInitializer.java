@@ -21,7 +21,7 @@ public class AdminInitializer {
         if (usuarioRepository.findByUsername("admin").isEmpty()) {
             Usuario admin = new Usuario();
             admin.setNome("Administrador");
-            admin.setUsername("admin");
+            admin.setUsername("ADMIN");
             admin.setEmail("admin@example.com");
             admin.setSenha(passwordEncoder.encode("admin123"));
             admin.setPerfil(Perfil.ADMIN);

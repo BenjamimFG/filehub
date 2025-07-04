@@ -15,8 +15,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import java.util.List;
-
+import br.com.projetounifor.filehub.dto.UsuarioRequestDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,7 +29,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import br.com.projetounifor.filehub.domain.model.Usuario;
-import br.com.projetounifor.filehub.dto.UsuarioDTO;
+import br.com.projetounifor.filehub.dto.UsuarioResponseDTO;
 import br.com.projetounifor.filehub.service.UsuarioService;
 
 @ExtendWith(MockitoExtension.class)
@@ -56,12 +55,12 @@ class UsuarioControllerTest {
 	@Test
 	void cadastrar_ShouldCreateUsuarioAndReturnCreatedStatus() throws Exception {
 		// Arrange
-		UsuarioDTO dto = new UsuarioDTO();
+		UsuarioResponseDTO dto = new UsuarioResponseDTO();
 		dto.setId(1L);
 		dto.setNome("Test User");
 		dto.setUsername("testuser");
 		dto.setEmail("test@example.com");
-		when(usuarioService.cadastrar(any(UsuarioDTO.class))).thenReturn(dto);
+		when(usuarioService.cadastrar(any(UsuarioRequestDTO.class))).thenReturn(dto);
 
 		String requestBody = objectMapper.writeValueAsString(dto);
 
@@ -72,7 +71,7 @@ class UsuarioControllerTest {
 				.andExpect(jsonPath("$.username").value("testuser"))
 				.andExpect(jsonPath("$.email").value("test@example.com"));
 
-		verify(usuarioService, times(1)).cadastrar(any(UsuarioDTO.class));
+		verify(usuarioService, times(1)).cadastrar(any(UsuarioRequestDTO.class));
 		verifyNoMoreInteractions(usuarioService);
 	}
 

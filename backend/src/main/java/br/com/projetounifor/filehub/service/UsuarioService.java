@@ -4,13 +4,14 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
+import br.com.projetounifor.filehub.dto.UsuarioRequestDTO;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.com.projetounifor.filehub.domain.model.Usuario;
 import br.com.projetounifor.filehub.domain.repository.UsuarioRepository;
-import br.com.projetounifor.filehub.dto.UsuarioDTO;
+import br.com.projetounifor.filehub.dto.UsuarioResponseDTO;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -22,14 +23,14 @@ public class UsuarioService {
     private final PasswordEncoder passwordEncoder;
 
     // Cadastrar novo usuário
-    public UsuarioDTO cadastrar(UsuarioDTO  usuarioDTO) {
-        Usuario usuario = fromDTO(usuarioDTO);
+    public UsuarioResponseDTO cadastrar(UsuarioRequestDTO usuarioDTO) {
+        Usuario usuario = fromResquestDTO(usuarioDTO);
         usuario.setSenha(passwordEncoder.encode(usuarioDTO.getSenha()));
         return toDTO(usuarioRepository.save(usuario));
     }
 
     // Buscar todos os usuários
-    public List<UsuarioDTO> listarTodos() {
+    public List<UsuarioResponseDTO> listarTodos() {
             return usuarioRepository.findAll()
                     .stream()
                     .map(this::toDTO)
@@ -64,8 +65,8 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    public UsuarioDTO toDTO(Usuario usuario) {
-        UsuarioDTO dto = new UsuarioDTO();
+    public UsuarioResponseDTO toDTO(Usuario usuario) {
+        UsuarioResponseDTO dto = new UsuarioResponseDTO();
         dto.setId(usuario.getId());
         dto.setNome(usuario.getNome());
         dto.setEmail(usuario.getEmail());
@@ -74,11 +75,11 @@ public class UsuarioService {
         return dto;
     }
 
-    public Usuario fromDTO(UsuarioDTO dto) {
+    public Usuario fromResquestDTO(UsuarioRequestDTO dto) {
         Usuario usuario = new Usuario();
         usuario.setNome(dto.getNome());
         usuario.setEmail(dto.getEmail());
-        usuario.setUsername(dto.getUsername());
+        usuario.setUsername(dto.getUsername().toUpperCase());
         usuario.setSenha(dto.getSenha());
         usuario.setPerfil(dto.getPerfil());
         return usuario;
