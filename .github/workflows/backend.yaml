@@ -34,7 +34,7 @@ jobs:
       - name: Build Spring Boot app
         run: |
           cd backend
-          ./mvnw clean package -DskipTests
+          ./mvnw clean package -Dmaven.test.skip
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
