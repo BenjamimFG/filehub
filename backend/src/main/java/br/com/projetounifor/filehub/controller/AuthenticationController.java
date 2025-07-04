@@ -1,5 +1,6 @@
 package br.com.projetounifor.filehub.controller;
 
+import br.com.projetounifor.filehub.domain.model.Projeto;
 import br.com.projetounifor.filehub.domain.model.Usuario;
 import br.com.projetounifor.filehub.service.UsuarioService;
 import org.springframework.http.ResponseEntity;
@@ -17,6 +18,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/auth")
@@ -46,9 +49,26 @@ public class AuthenticationController {
         try {
             var authenticationToken = new UsernamePasswordAuthenticationToken(login.username(), login.senha());
             authManager.authenticate(authenticationToken);
+
             Usuario usuario = usuarioService.buscarPorUsername(login.username());
             var token = jwtUtil.gerarToken(login.username(), usuario.getPerfil().name(), usuario.getId());
-            return ResponseEntity.ok(new LoginResponse(token));
+
+            // Mapeando IDs dos repositórios
+            List<Long> repositoriosMembro = usuario.getProjetos()
+                    .stream()
+                    .map(Projeto::getId)
+                    .toList();
+
+            // Novo response com dados do usuário
+            var response = new LoginResponse(
+                    token,
+                    usuario.getId(),
+                    usuario.getNome(),
+                    usuario.getPerfil().name(),
+                    repositoriosMembro
+            );
+
+            return ResponseEntity.ok(response);
         } catch (AuthenticationException e) {
             return ResponseEntity.status(401).body("Usuário ou senha inválidos");
         }
@@ -65,6 +85,19 @@ public class AuthenticationController {
 
     public static record LoginResponse(
             @Schema(description = "Token JWT gerado após autenticação", example = "eyJhbGciOiJIUzI1NiIsInR5cCI6...")
-            String token
+            String token,
+
+            @Schema(description = "ID do usuário", example = "1")
+            Long id,
+
+            @Schema(description = "Nome do usuário", example = "João Silva")
+            String nome,
+
+            @Schema(description = "Perfil do usuário", example = "USUARIO")
+            String perfil,
+
+            @Schema(description = "IDs dos repositórios que o usuário é membro", example = "[1, 3, 5]")
+            List<Long> repositoriosMembro
     ) {}
+
 }
