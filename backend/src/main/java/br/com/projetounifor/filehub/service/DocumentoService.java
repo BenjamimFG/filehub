@@ -1,8 +1,13 @@
 package br.com.projetounifor.filehub.service;
 
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import br.com.projetounifor.filehub.domain.model.Documento;
 import br.com.projetounifor.filehub.domain.model.Projeto;
@@ -11,14 +16,7 @@ import br.com.projetounifor.filehub.domain.model.enums.StatusDocumento;
 import br.com.projetounifor.filehub.domain.repository.DocumentoRepository;
 import br.com.projetounifor.filehub.domain.repository.ProjetoRepository;
 import br.com.projetounifor.filehub.domain.repository.UsuarioRepository;
-import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
-
-
-
-import java.io.File;
-import java.io.IOException;
-
+import br.com.projetounifor.filehub.dto.DocumentoDTO;
 import lombok.RequiredArgsConstructor;
 
 @Service

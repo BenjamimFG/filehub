@@ -3,14 +3,13 @@ package br.com.projetounifor.filehub.service;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import br.com.projetounifor.filehub.domain.model.Usuario;
-import br.com.projetounifor.filehub.domain.repository.UsuarioRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-
-
+import br.com.projetounifor.filehub.domain.model.Usuario;
+import br.com.projetounifor.filehub.domain.repository.UsuarioRepository;
+import br.com.projetounifor.filehub.dto.UsuarioDTO;
 import lombok.RequiredArgsConstructor;
 
 @Service
