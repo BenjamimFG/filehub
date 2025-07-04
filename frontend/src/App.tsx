@@ -6,6 +6,9 @@ import Index from './pages/Index';
 import NotFound from './pages/NotFound';
 import Dashboard from './pages/Dashboard';
 
+// Login
+import Login from './pages/login/login';
+
 // Project pages
 import ProjectsPage from './pages/projects/ProjectsPage';
 import ProjectDetails from './pages/projects/ProjectDetails';
@@ -26,7 +29,12 @@ const App = () => (
       <Toaster />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Dashboard />} />
+          {/* Project routes */}
+          <Route path="/" element={<Login />} />
+          <Route path="/login" element={<Login />} />
+
+          {/* Project routes */}
+          
           <Route path="/dashboard" element={<Dashboard />} />
           
           {/* Project routes */}
