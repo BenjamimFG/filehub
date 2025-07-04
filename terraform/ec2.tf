@@ -46,10 +46,6 @@ resource "aws_instance" "filehub_api_ec2" {
 
     systemctl enable docker.service
     systemctl start docker.service
-
-    docker pull benfreitas/filehub:1.0
-
-    docker run -p80:8080 --restart always -d benfreitas/filehub:1.0
   EOF
 }
 
