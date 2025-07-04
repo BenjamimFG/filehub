@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -30,32 +31,26 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // 1. ADICIONADO: Ativa a configuração de CORS definida no bean 'corsConfigurationSource' abaixo.
-            .cors(withDefaults())
-            
-            // 2. Sua configuração de CSRF foi mantida, mas simplificada.
-            // .disable() desativa para todos os endpoints, o que já cobre o H2.
-            .csrf(csrf -> csrf.disable())
-            
-            // 3. Sua configuração para permitir frames do H2 Console foi mantida.
-            .headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin())
-            )
-            
-            // 4. ADICIONADO: Define a política de sessão como STATELESS, essencial para APIs com JWT.
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-            // 5. Sua configuração de autorização de requisições foi mantida.
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/auth/**", // Permitir /auth/login e outras rotas de autenticação
-                    "/swagger-ui/**",
-                    "/v3/api-docs/**",
-                    "/h2-console/**"
-                ).permitAll()
-                .anyRequest().authenticated()
-            )
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                .cors(Customizer.withDefaults())
+                // Desabilitar CSRF apenas para o H2 Console
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/h2-console/**")
+                        .disable() // Ou só desabilitar para h2-console
+                )
+                // Permitir frames do mesmo domínio (necessário para o H2 console)
+                .headers(headers -> headers
+                        .frameOptions(frame -> frame.sameOrigin())
+                )
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(
+                                "/auth/login",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/h2-console/**"
+                        ).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
