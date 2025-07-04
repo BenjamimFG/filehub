@@ -53,7 +53,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.listarTodos());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/id/{id}")
     @Operation(
             summary = "Busca usuário por ID",
             description = "Retorna os dados do usuário correspondente ao ID fornecido."
@@ -69,7 +69,7 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioService.buscarPorId(id));
     }
 
-    @GetMapping("/{username}")
+    @GetMapping("/username/{username}")
     @Operation(
             summary = "Busca usuário por Username",
             description = "Retorna os dados do usuário correspondente ao Username fornecido."
