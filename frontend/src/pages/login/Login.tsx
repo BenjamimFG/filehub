@@ -12,20 +12,30 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { KeyRound, Loader2 } from 'lucide-react';
 import CryptoJS from 'crypto-js';
+import { useAuth } from '@/contexts/AuthContext'; // 1. Importe o hook useAuth
 
-// Chave de criptografia. EM UM PROJETO REAL, ISSO NUNCA DEVE SER ARMAZENADO NO CÓDIGO!
-// O ideal é que venha de uma variável de ambiente.
-// CORREÇÃO: Vite usa `import.meta.env` para acessar variáveis de ambiente, não `process.env`.
 const ENCRYPTION_KEY = import.meta.env.VITE_ENCRYPTION_KEY || 'default-super-secret-key-for-dev';
+
+// --- Interfaces para tipar a resposta da API ---
+interface UserData {
+  id: number;
+  nome: string;
+  perfil: 'ADMIN' | 'APROVADOR' | 'USUARIO';
+  repositoriosMembro: number[];
+}
+
+interface LoginApiResponse extends UserData {
+  token: string;
+}
 
 
 const Login: React.FC = () => {
+  const { login } = useAuth(); // 2. Obtenha a função de login do contexto
   const [username, setUsername] = useState('');
   const [senha, setSenha] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Função para lidar com o login
   const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
@@ -44,23 +54,27 @@ const Login: React.FC = () => {
         }),
       });
 
-      const data = await response.json();
+      const data: LoginApiResponse | { message: string } = await response.json();
 
       if (!response.ok) {
-        // Tenta pegar uma mensagem de erro mais específica da API, se houver
-        const errorMessage = data?.message || data?.error || 'Falha ao autenticar. Verifique suas credenciais.';
+        const errorMessage = (data as { message: string }).message || 'Falha na autenticação.';
         throw new Error(errorMessage);
       }
+      
+      const responseData = data as LoginApiResponse;
 
-      if (data.token) {
-        // **ARMAZENAMENTO DO TOKEN**
-        // Criptografando o token antes de salvar no localStorage.
-        const encryptedToken = CryptoJS.AES.encrypt(data.token, ENCRYPTION_KEY).toString();
-        
-        // Usamos localStorage para persistir entre sessões.
+      if (responseData.token) {
+        // --- ARMAZENAMENTO ATUALIZADO ---
+
+        // 1. Criptografa e armazena o token como antes.
+        const encryptedToken = CryptoJS.AES.encrypt(responseData.token, ENCRYPTION_KEY).toString();
         localStorage.setItem('authToken', encryptedToken);
 
-        // Redireciona para o dashboard após o login
+        // 2. CHAMA A FUNÇÃO DE LOGIN DO CONTEXTO
+        // Isso irá definir o usuário no estado global e também salvá-lo no localStorage.
+        login(responseData);
+
+        // 3. Redireciona para o dashboard.
         window.location.href = '/dashboard';
 
       } else {
@@ -93,7 +107,7 @@ const Login: React.FC = () => {
               <Input
                 id="username"
                 type="text"
-                placeholder="Usuario"
+                placeholder="Usuário"
                 required
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
