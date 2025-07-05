@@ -162,7 +162,7 @@ class DocumentoServiceTest {
 		when(documentoRepository.findByProjetoId(projetoId)).thenReturn(documentos);
 
 		// Act
-		List<Documento> result = documentoService.consultarPorProjeto(projetoId);
+		List<DocumentoDTO> result = documentoService.consultarPorProjeto(projetoId);
 
 		// Assert
 		assertNotNull(result, "A lista de documentos não deve ser nula");

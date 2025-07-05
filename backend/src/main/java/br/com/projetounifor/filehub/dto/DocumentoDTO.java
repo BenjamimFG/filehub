@@ -20,4 +20,3 @@ public class DocumentoDTO {
     private LocalDateTime criadoEm;
     private LocalDateTime aprovadoEm;
 }
-

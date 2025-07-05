@@ -1,8 +1,10 @@
 package br.com.projetounifor.filehub.config;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
@@ -49,6 +51,20 @@ public class JWTUtil {
             return false;
         }
     }
+
+    public Claims parseToken(String token) {
+        Claims claims;
+        try {
+            claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (UnsupportedJwtException e) {
+            System.err.println("Erro ao decodificar JWT");
+            claims = null;
+        }
+
+        return claims;
+    }
 }
-
-

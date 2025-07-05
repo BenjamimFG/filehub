@@ -86,9 +86,9 @@ class DocumentoControllerTest {
 	void listarPorProjeto_ShouldReturnListOfDocumentos() throws Exception {
 		// Arrange
 		Long projetoId = 1L;
-		Documento documento = new Documento();
+		DocumentoDTO documento = new DocumentoDTO();
 		documento.setId(1L);
-		List<Documento> documentos = List.of(documento);
+		List<DocumentoDTO> documentos = List.of(documento);
 		when(documentoService.consultarPorProjeto(projetoId)).thenReturn(documentos);
 
 		// Act & Assert
