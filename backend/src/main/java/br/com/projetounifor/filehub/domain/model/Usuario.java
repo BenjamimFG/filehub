@@ -15,8 +15,9 @@ import java.util.Set;
 @Getter @Setter
 @NoArgsConstructor @AllArgsConstructor
 public class Usuario implements UserDetails {
-
-    @Id @GeneratedValue
+	private static final long serialVersionUID = 1L;
+	
+	@Id @GeneratedValue
     private Long id;
     private String nome;
     private String email;

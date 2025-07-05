@@ -1,17 +1,19 @@
 package br.com.projetounifor.filehub.service;
 
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Set;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import br.com.projetounifor.filehub.domain.model.Projeto;
 import br.com.projetounifor.filehub.domain.model.Usuario;
 import br.com.projetounifor.filehub.domain.repository.ProjetoRepository;
 import br.com.projetounifor.filehub.domain.repository.UsuarioRepository;
 import br.com.projetounifor.filehub.dto.ProjetoResponseDTO;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import lombok.RequiredArgsConstructor;
 
 @Service

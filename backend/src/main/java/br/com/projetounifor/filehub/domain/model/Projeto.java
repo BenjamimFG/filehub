@@ -3,6 +3,7 @@ package br.com.projetounifor.filehub.domain.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.Date;
 import java.util.Set;
 
 @Entity
@@ -13,6 +14,9 @@ public class Projeto {
     private Long id;
     private String nome;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    private Date dataCriacao;
+
     @ManyToOne
     private Usuario criador;
 
@@ -21,4 +25,10 @@ public class Projeto {
 
     @ManyToMany
     private Set<Usuario> aprovadores;
+    
+ // Método executado automaticamente antes de persistir a entidade
+    @PrePersist
+    private void prePersist() {
+        this.dataCriacao = new Date();
+    }
 }
