@@ -1,10 +1,8 @@
 package br.com.projetounifor.filehub.service;
 
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Set;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +11,7 @@ import br.com.projetounifor.filehub.domain.model.Projeto;
 import br.com.projetounifor.filehub.domain.model.Usuario;
 import br.com.projetounifor.filehub.domain.repository.ProjetoRepository;
 import br.com.projetounifor.filehub.domain.repository.UsuarioRepository;
+import br.com.projetounifor.filehub.dto.ProjetoRequestDTO;
 import br.com.projetounifor.filehub.dto.ProjetoResponseDTO;
 import lombok.RequiredArgsConstructor;
 
@@ -28,22 +27,27 @@ public class ProjetoService {
         return new ProjetoResponseDTO(
                 projeto.getId(),
                 projeto.getNome(),
+                projeto.getDataCriacao(),
                 projeto.getCriador().getId(),
-                projeto.getUsuarios().stream().map(u -> u.getId()).toList(),
-                projeto.getAprovadores().stream().map(u -> u.getId()).toList()
+                projeto.getUsuarios().stream().map(Usuario::getId).toList(),
+                projeto.getAprovadores().stream().map(Usuario::getId).toList()
         );
     }
 
-    // Criar projeto novo
-    public ProjetoResponseDTO criarProjeto(String nome, Long idCriador, List<Long> usuariosIds, List<Long> aprovadoresIds) {
-        Usuario criador = usuarioRepository.findById(idCriador)
+    // Criar projeto novo usando ProjetoRequestDTO
+    public ProjetoResponseDTO criarProjeto(ProjetoRequestDTO dto) {
+        Usuario criador = usuarioRepository.findById(dto.getCriadorId())
                 .orElseThrow(() -> new RuntimeException("Usuário criador não encontrado"));
 
         Projeto projeto = new Projeto();
-        projeto.setNome(nome);
+        projeto.setNome(dto.getNome());
         projeto.setCriador(criador);
-        projeto.setUsuarios(Set.copyOf(usuarioRepository.findAllById(usuariosIds)));
-        projeto.setAprovadores(Set.copyOf(usuarioRepository.findAllById(aprovadoresIds)));
+        projeto.setUsuarios(dto.getUsuariosIds() != null 
+                ? new HashSet<>(usuarioRepository.findAllById(dto.getUsuariosIds())) 
+                : new HashSet<>());
+        projeto.setAprovadores(dto.getAprovadoresIds() != null 
+                ? new HashSet<>(usuarioRepository.findAllById(dto.getAprovadoresIds())) 
+                : new HashSet<>());
         return toDTO(projetoRepository.save(projeto));
     }
 
@@ -53,8 +57,6 @@ public class ProjetoService {
                 .map(this::toDTO)
                 .toList();
     }
-
-
 
     // Buscar projeto por ID
     public ProjetoResponseDTO buscarPorIdDTO(Long id) {
@@ -69,16 +71,20 @@ public class ProjetoService {
     }
 
     // Atualizar projeto por ID
-    public ProjetoResponseDTO atualizar(Long id, String nome, Long idCriador, List<Long> usuariosIds, List<Long> aprovadoresIds) {
+    public ProjetoResponseDTO atualizar(Long id, ProjetoRequestDTO dto) {
         Projeto projetoExistente = buscarPorId(id);
 
-        Usuario criador = usuarioRepository.findById(idCriador)
+        Usuario criador = usuarioRepository.findById(dto.getCriadorId())
                 .orElseThrow(() -> new RuntimeException("Usuário criador não encontrado"));
 
-        projetoExistente.setNome(nome);
+        projetoExistente.setNome(dto.getNome());
         projetoExistente.setCriador(criador);
-        projetoExistente.setUsuarios(new HashSet<>(usuarioRepository.findAllById(usuariosIds)));
-        projetoExistente.setAprovadores(new HashSet<>(usuarioRepository.findAllById(aprovadoresIds)));
+        projetoExistente.setUsuarios(dto.getUsuariosIds() != null 
+                ? new HashSet<>(usuarioRepository.findAllById(dto.getUsuariosIds())) 
+                : new HashSet<>());
+        projetoExistente.setAprovadores(dto.getAprovadoresIds() != null 
+                ? new HashSet<>(usuarioRepository.findAllById(dto.getAprovadoresIds())) 
+                : new HashSet<>());
 
         return toDTO(projetoRepository.save(projetoExistente));
     }
@@ -128,5 +134,4 @@ public class ProjetoService {
         projeto.getAprovadores().remove(usuario);
         return toDTO(projetoRepository.save(projeto));
     }
-
 }

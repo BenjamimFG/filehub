@@ -1,10 +1,20 @@
 package br.com.projetounifor.filehub.domain.model;
 
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.Set;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.PrePersist;
+import jakarta.persistence.Temporal;
+import jakarta.persistence.TemporalType;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Getter @Setter
@@ -15,7 +25,7 @@ public class Projeto {
     private String nome;
 
     @Temporal(TemporalType.TIMESTAMP)
-    private Date dataCriacao;
+    private LocalDateTime dataCriacao;
 
     @ManyToOne
     private Usuario criador;
@@ -26,9 +36,9 @@ public class Projeto {
     @ManyToMany
     private Set<Usuario> aprovadores;
     
- // Método executado automaticamente antes de persistir a entidade
     @PrePersist
     private void prePersist() {
-        this.dataCriacao = new Date();
+        this.dataCriacao = LocalDateTime.now();
     }
+    
 }
