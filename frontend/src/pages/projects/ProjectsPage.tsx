@@ -50,7 +50,6 @@ import {
   CalendarIcon,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-// CORREÇÃO: Removendo mocks e importando tipos e serviços da API
 import { projectsApi, usersApi, Projeto, Usuario } from '@/lib/api';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -64,13 +63,11 @@ const PAGE_SIZE = 10;
 const ProjectsPage: React.FC = () => {
   const { hasPermission } = useAuth();
 
-  // Estados para os dados da API
   const [projects, setProjects] = useState<Projeto[]>([]);
   const [users, setUsers] = useState<Usuario[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Estados para controle da UI
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -79,14 +76,15 @@ const ProjectsPage: React.FC = () => {
   const [endDate, setEndDate] = useState<Date>();
 
   useEffect(() => {
-    const loadData = async () => {
-      try {
+    const loadData = async (isInitialLoad = false) => {
+      // Só mostra o indicador de "carregando" na primeira vez
+      if (isInitialLoad) {
         setIsLoading(true);
+      }
+      try {
         setError(null);
-        // Busca projetos e usuários em paralelo para otimizar
         const [projectsData, usersData] = await Promise.all([
           projectsApi.getProjects(),
-          // Só busca todos os usuários se for para preencher um select, por exemplo
           hasPermission('manage_projects') ? usersApi.getUsers() : Promise.resolve([]),
         ]);
         setProjects(projectsData);
@@ -94,17 +92,26 @@ const ProjectsPage: React.FC = () => {
       } catch (err: any) {
         setError(err.message);
       } finally {
-        setIsLoading(false);
+        if (isInitialLoad) {
+          setIsLoading(false);
+        }
       }
     };
 
-    loadData();
+    // 1. Carrega os dados imediatamente quando o componente monta
+    loadData(true);
+
+    // 2. Configura um intervalo para chamar a função loadData a cada 30 segundos
+    const intervalId = setInterval(() => loadData(false), 30000);
+
+    // 3. Função de limpeza: remove o intervalo quando o componente é desmontado para evitar vazamentos de memória
+    return () => clearInterval(intervalId);
   }, [hasPermission]);
 
   const filteredProjects = projects.filter(project => {
     const matchesSearchTerm = project.nome.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || project.status === statusFilter;
-    return matchesSearchTerm && matchesStatus;
+     
+    return matchesSearchTerm  ;
   });
 
   const totalPages = Math.ceil(filteredProjects.length / PAGE_SIZE);
@@ -114,7 +121,7 @@ const ProjectsPage: React.FC = () => {
   );
 
   if (isLoading) {
-    return <AppLayout><div>Carregando projetos...</div></AppLayout>;
+    return <AppLayout><div>A carregar projetos...</div></AppLayout>;
   }
 
   if (error) {
@@ -137,17 +144,7 @@ const ProjectsPage: React.FC = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full sm:w-[150px]">
-                <SelectValue placeholder="Filtrar por status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Todos</SelectItem>
-                <SelectItem value="Ativo">Ativo</SelectItem>
-                <SelectItem value="Concluído">Concluído</SelectItem>
-                <SelectItem value="Em Espera">Em Espera</SelectItem>
-              </SelectContent>
-            </Select>
+
             {hasPermission('manage_projects') && (
               <Dialog open={projectFormOpen} onOpenChange={setProjectFormOpen}>
                 <DialogTrigger asChild>
@@ -164,7 +161,7 @@ const ProjectsPage: React.FC = () => {
                     </DialogDescription>
                   </DialogHeader>
                   <div className="grid gap-4 py-4">
-                    {/* Campos do formulário... */}
+                    {/* Campos do formulário aqui */}
                   </div>
                   <DialogFooter>
                     <Button variant="outline" onClick={() => setProjectFormOpen(false)}>
@@ -193,10 +190,8 @@ const ProjectsPage: React.FC = () => {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Nome</TableHead>
-                    <TableHead>Status</TableHead>
                     <TableHead>Criador</TableHead>
-                    <TableHead>Data de Início</TableHead>
-                    <TableHead>Data de Término</TableHead>
+                    <TableHead>Data de Criação</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -209,10 +204,8 @@ const ProjectsPage: React.FC = () => {
                             {project.nome}
                           </Link>
                         </TableCell>
-                        <TableCell>{project.status}</TableCell>
                         <TableCell>{project.criador.nome}</TableCell>
-                        <TableCell>{new Date(project.dataInicio).toLocaleDateString('pt-BR')}</TableCell>
-                        <TableCell>{new Date(project.dataFim).toLocaleDateString('pt-BR')}</TableCell>
+                        <TableCell>{new Date(project.dataCriacao).toLocaleDateString('pt-BR')}</TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>

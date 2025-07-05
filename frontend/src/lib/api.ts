@@ -17,6 +17,12 @@ export interface Usuario {
   // Adicione outros campos de usuário se necessário
 }
 
+
+export interface Role {
+  id: string;
+  nome: string;
+}
+
 // Interface para o objeto Projeto, agora com a estrutura correta
 export interface Projeto {
   id: number;
@@ -24,9 +30,7 @@ export interface Projeto {
   criador: Usuario; // Objeto aninhado
   usuarios: Usuario[]; // Array de objetos
   aprovadores: Usuario[]; // Array de objetos
-  status: 'Ativo' | 'Concluído' | 'Em Espera';
-  dataInicio: string; 
-  dataFim: string;
+  dataCriacao: string;
   // Adicione outros campos do projeto que a API retorna
 }
 
@@ -36,7 +40,7 @@ export interface Documento {
     nome: string;
     // ... adicione outros campos do documento aqui
 }
-export interface Role { /* ... seus campos da Role ... */ }
+
 
 // Função de fetch autenticado (sem alterações)
 async function authenticatedFetch(endpoint: string, options: RequestInit = {}): Promise<Response> {
@@ -133,5 +137,42 @@ export const usersApi = {
         if (!response.ok) throw new Error('Falha ao buscar usuários');
         return response.json();
     },
-    // Adicione outras chamadas de API para usuários aqui (getById, update, etc.)
+    updateUser: async (id: number, userData: Partial<Pick<Usuario, 'nome' | 'email' | 'perfil'>>): Promise<Usuario> => {
+        const response = await authenticatedFetch(`/usuarios/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify(userData),
+        });
+        if (!response.ok) throw new Error('Falha ao atualizar usuário');
+        return response.json();
+    },
+    deleteUser: async (id: number): Promise<void> => {
+        const response = await authenticatedFetch(`/usuarios/${id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Falha ao excluir usuário');
+    },
+    resetPassword: async (id: number, newPassword: string): Promise<void> => {
+        // A API precisa de um endpoint para isso, ex: PUT /usuarios/{id}/reset-password
+        const response = await authenticatedFetch(`/usuarios/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ novaSenha: newPassword }),
+        });
+        if (!response.ok) throw new Error('Falha ao redefinir a senha');
+    }
+};
+
+
+
+// rolesApi agora é um objeto com um método getRoles
+export const rolesApi = {
+    getRoles: async (): Promise<Role[]> => {
+        // Supondo que você tenha um endpoint para buscar as funções/perfis.
+        // Se não tiver, você pode retornar uma lista estática aqui por enquanto.
+        // Ex: return Promise.resolve([{ id: 'ADMIN', name: 'ADMIN' }, ...]);
+        const mockRoles: Role[] = [
+            { id: 'ADMIN', nome: 'ADMIN' },
+            { id: 'USUARIO', nome: 'USUARIO' },
+        ];
+        return Promise.resolve(mockRoles);
+    }
 };

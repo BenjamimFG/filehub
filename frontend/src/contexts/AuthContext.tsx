@@ -30,7 +30,7 @@ const getPermissionsForProfile = (profile: string): string[] => {
     case 'APROVADOR':
       return ['view_assigned_projects', 'upload_my_documents', 'approve_document'];
     case 'USUARIO':
-      return ['view_assigned_projects', 'upload_my_documents'];
+      return ['view_assigned_projects', 'upload_my_documents', 'approve_document'];
     default:
       return [];
   }
