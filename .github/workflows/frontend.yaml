@@ -62,7 +62,7 @@ jobs:
     needs: [build]
     
     steps:
-      - name: SSH and deploy api
+      - name: SSH and deploy front
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.FRONT_URL }}
@@ -73,4 +73,4 @@ jobs:
             sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
             sudo docker stop filehub-front
             sudo docker container rm filehub-front
-            sudo docker run -p80:8080 -d --name filehub-front ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            sudo docker run -p80:3000 -d --name filehub-front ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
