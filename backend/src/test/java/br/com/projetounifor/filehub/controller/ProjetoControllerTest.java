@@ -1,6 +1,5 @@
 package br.com.projetounifor.filehub.controller;
 
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
@@ -17,7 +16,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.util.List;
 
-import br.com.projetounifor.filehub.dto.ProjetoResponseDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -30,8 +28,8 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import br.com.projetounifor.filehub.domain.model.Projeto;
 import br.com.projetounifor.filehub.dto.ProjetoRequestDTO;
+import br.com.projetounifor.filehub.dto.ProjetoResponseDTO;
 import br.com.projetounifor.filehub.service.ProjetoService;
 
 @ExtendWith(MockitoExtension.class)
@@ -61,7 +59,7 @@ class ProjetoControllerTest {
 		ProjetoResponseDTO projeto = new ProjetoResponseDTO();
 		projeto.setId(1L);
 		projeto.setNome("Projeto Teste");
-		when(projetoService.criarProjeto(eq("Projeto Teste"), eq(1L), any(List.class), any(List.class)))
+		when(projetoService.criarProjeto(dto))
 				.thenReturn(projeto);
 
 		String requestBody = objectMapper.writeValueAsString(dto);
@@ -71,7 +69,7 @@ class ProjetoControllerTest {
 				.andExpect(status().isCreated()).andExpect(header().string("Location", "/projetos/1"))
 				.andExpect(jsonPath("$.id").value(1L)).andExpect(jsonPath("$.nome").value("Projeto Teste"));
 
-		verify(projetoService, times(1)).criarProjeto(eq("Projeto Teste"), eq(1L), any(List.class), any(List.class));
+		verify(projetoService, times(1)).criarProjeto(dto);
 		verifyNoMoreInteractions(projetoService);
 	}
 
@@ -117,7 +115,7 @@ class ProjetoControllerTest {
 		ProjetoResponseDTO projeto = new ProjetoResponseDTO();
 		projeto.setId(id);
 		projeto.setNome("Projeto Atualizado");
-		when(projetoService.atualizar(eq(id), eq("Projeto Atualizado"), eq(1L), any(List.class), any(List.class)))
+		when(projetoService.atualizar(eq(id), dto))
 				.thenReturn(projeto);
 
 		String requestBody = objectMapper.writeValueAsString(dto);
@@ -127,8 +125,7 @@ class ProjetoControllerTest {
 				.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(id))
 				.andExpect(jsonPath("$.nome").value("Projeto Atualizado"));
 
-		verify(projetoService, times(1)).atualizar(eq(id), eq("Projeto Atualizado"), eq(1L), any(List.class),
-				any(List.class));
+		verify(projetoService, times(1)).atualizar(eq(id), dto);
 		verifyNoMoreInteractions(projetoService);
 	}
 

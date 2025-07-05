@@ -16,7 +16,6 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 
-import br.com.projetounifor.filehub.dto.ProjetoResponseDTO;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -27,6 +26,8 @@ import br.com.projetounifor.filehub.domain.model.Projeto;
 import br.com.projetounifor.filehub.domain.model.Usuario;
 import br.com.projetounifor.filehub.domain.repository.ProjetoRepository;
 import br.com.projetounifor.filehub.domain.repository.UsuarioRepository;
+import br.com.projetounifor.filehub.dto.ProjetoRequestDTO;
+import br.com.projetounifor.filehub.dto.ProjetoResponseDTO;
 
 @ExtendWith(MockitoExtension.class)
 class ProjetoServiceTest {
@@ -64,9 +65,11 @@ class ProjetoServiceTest {
 		when(usuarioRepository.findAllById(usuariosIds)).thenReturn(List.of(usuario));
 		when(usuarioRepository.findAllById(aprovadoresIds)).thenReturn(List.of(aprovador));
 		when(projetoRepository.save(any(Projeto.class))).thenReturn(projeto);
+		
+		ProjetoRequestDTO dto = new ProjetoRequestDTO(nome, idCriador, usuariosIds, aprovadoresIds);
 
 		// Act
-		ProjetoResponseDTO result = projetoService.criarProjeto(nome, idCriador, usuariosIds, aprovadoresIds);
+		ProjetoResponseDTO result = projetoService.criarProjeto(dto);
 
 		// Assert
 		assertNotNull(result, "O projeto retornado não deve ser nulo");
@@ -87,10 +90,12 @@ class ProjetoServiceTest {
 		List<Long> usuariosIds = List.of(2L);
 		List<Long> aprovadoresIds = List.of(3L);
 		when(usuarioRepository.findById(idCriador)).thenReturn(Optional.empty());
+		
+		ProjetoRequestDTO dto = new ProjetoRequestDTO(nome, idCriador, usuariosIds, aprovadoresIds);
 
 		// Act & Assert
 		RuntimeException exception = assertThrows(RuntimeException.class, () -> {
-			projetoService.criarProjeto(nome, idCriador, usuariosIds, aprovadoresIds);
+			projetoService.criarProjeto(dto);
 		});
 		assertEquals("Usuário criador não encontrado", exception.getMessage(),
 				"A mensagem de erro deve ser a esperada");
@@ -187,9 +192,11 @@ class ProjetoServiceTest {
 		when(usuarioRepository.findAllById(usuariosIds)).thenReturn(List.of(usuario));
 		when(usuarioRepository.findAllById(aprovadoresIds)).thenReturn(List.of(aprovador));
 		when(projetoRepository.save(any(Projeto.class))).thenReturn(projetoAtualizado);
+		
+		ProjetoRequestDTO dto = new ProjetoRequestDTO(nome, idCriador, usuariosIds, aprovadoresIds);
 
 		// Act
-		ProjetoResponseDTO result = projetoService.atualizar(id, nome, idCriador, usuariosIds, aprovadoresIds);
+		ProjetoResponseDTO result = projetoService.atualizar(id, dto);
 
 		// Assert
 		assertNotNull(result, "O projeto retornado não deve ser nulo");
@@ -212,10 +219,12 @@ class ProjetoServiceTest {
 		List<Long> usuariosIds = List.of(2L);
 		List<Long> aprovadoresIds = List.of(3L);
 		when(projetoRepository.findById(id)).thenReturn(Optional.empty());
+		
+		ProjetoRequestDTO dto = new ProjetoRequestDTO(nome, idCriador, usuariosIds, aprovadoresIds);
 
 		// Act & Assert
 		NoSuchElementException exception = assertThrows(NoSuchElementException.class, () -> {
-			projetoService.atualizar(id, nome, idCriador, usuariosIds, aprovadoresIds);
+			projetoService.atualizar(id, dto);
 		});
 		assertEquals("Projeto não encontrado com id: " + id, exception.getMessage(),
 				"A mensagem de erro deve ser a esperada");
