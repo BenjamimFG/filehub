@@ -6,12 +6,14 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 
-
 @Entity
-@Getter @Setter
-@NoArgsConstructor @AllArgsConstructor
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Documento {
-    @Id @GeneratedValue
+    @Id
+    @GeneratedValue
     private Long id;
     private String nomeArquivo;
     private String caminhoArquivo;
@@ -21,6 +23,7 @@ public class Documento {
     private StatusDocumento status;
 
     @ManyToOne
+    @JoinColumn(name = "project_id")
     private Projeto projeto;
 
     @ManyToOne
