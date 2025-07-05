@@ -1,8 +1,10 @@
 package br.com.projetounifor.filehub.config;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.stereotype.Component;
 
@@ -17,11 +19,12 @@ public class JWTUtil {
     private final long EXPIRATION_TIME = 86400000;
 
     // gerar token
-    public String gerarToken(String username, String role, Long id) {
+    public String gerarToken(String username, String role, Long id, String email) {
         return Jwts.builder()
                 .setSubject(username)
                 .claim("id", id)
                 .claim("role", role)
+                .claim("email", email)
                 .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(secretKey)
                 .compact();
@@ -49,6 +52,20 @@ public class JWTUtil {
             return false;
         }
     }
+
+    public Claims parseToken(String token) {
+        Claims claims;
+        try {
+            claims = Jwts.parserBuilder()
+                    .setSigningKey(secretKey)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (UnsupportedJwtException e) {
+            System.err.println("Erro ao decodificar JWT");
+            claims = null;
+        }
+
+        return claims;
+    }
 }
-
-

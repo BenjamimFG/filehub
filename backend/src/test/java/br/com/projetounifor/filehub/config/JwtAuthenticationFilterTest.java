@@ -1,6 +1,5 @@
 package br.com.projetounifor.filehub.config;
 
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -49,7 +48,8 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void doFilterInternal_NoAuthorizationHeader_ShouldProceedWithoutAuthentication() throws ServletException, IOException {
+    void doFilterInternal_NoAuthorizationHeader_ShouldProceedWithoutAuthentication()
+            throws ServletException, IOException {
         // Arrange
         when(request.getHeader("Authorization")).thenReturn(null);
 
@@ -64,7 +64,8 @@ class JwtAuthenticationFilterTest {
     }
 
     @Test
-    void doFilterInternal_NonBearerAuthorizationHeader_ShouldProceedWithoutAuthentication() throws ServletException, IOException {
+    void doFilterInternal_NonBearerAuthorizationHeader_ShouldProceedWithoutAuthentication()
+            throws ServletException, IOException {
         // Arrange
         when(request.getHeader("Authorization")).thenReturn("Basic someCredentials");
 

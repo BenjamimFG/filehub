@@ -1,0 +1,77 @@
+name: Frontend CI/CD Pipeline
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - frontend/**
+  workflow_dispatch:
+
+env:
+  IMAGE_NAME: filehub-front
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-${{ hashFiles('frontend/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm install
+
+      - name: Build frontend app
+        run: |
+          cd frontend
+          rm -f .env
+          echo VITE_API_URL=http://${{ secrets.API_URL }} > .env
+          npm run build
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build Docker image
+        run: |
+          cd frontend
+          docker build -t ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest .
+
+      - name: Push Docker image
+        run: |
+          docker push ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build]
+    
+    steps:
+      - name: SSH and deploy front
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.FRONT_URL }}
+          username: ubuntu
+          key: ${{ secrets.EC2_PRIVATE_KEY }}
+          passphrase: ${{ secrets.EC2_PRIVATE_KEY_PW }}
+          script: |
+            sudo docker pull ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest
+            sudo docker stop filehub-front
+            sudo docker container rm filehub-front
+            sudo docker run -p80:3000 -d --name filehub-front ${{ secrets.DOCKER_USERNAME }}/${{ env.IMAGE_NAME }}:latest

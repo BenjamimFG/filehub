@@ -18,7 +18,7 @@ public class AdminInitializer {
 
     @PostConstruct
     public void init() {
-        if (usuarioRepository.findByUsername("admin").isEmpty()) {
+        if (usuarioRepository.findByUsername("ADMIN").isEmpty()) {
             Usuario admin = new Usuario();
             admin.setNome("Administrador");
             admin.setUsername("ADMIN");

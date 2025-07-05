@@ -1,11 +1,13 @@
 package br.com.projetounifor.filehub.service;
 
-
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +28,9 @@ public class DocumentoService {
     private final ProjetoRepository projetoRepository;
     private final UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private final S3Service s3Service;
+
     public DocumentoDTO submeterDocumento(Long projetoId, Long usuarioId, MultipartFile file) {
         Projeto projeto = projetoRepository.findById(projetoId)
                 .orElseThrow(() -> new RuntimeException("Projeto não encontrado"));
@@ -41,25 +46,18 @@ public class DocumentoService {
             dir.mkdirs(); // Cria diretório e subdiretórios
         }
 
-        // Caminho completo do arquivo
-        String caminhoCompleto = uploadDir + "/" + file.getOriginalFilename();
+        String bucketName = "filehub-document-bucket";
+        String keyName = UUID.randomUUID() + file.getOriginalFilename();
 
-        // Salvar arquivo fisicamente
         try {
-            file.transferTo(new File(caminhoCompleto));
-                /* TODO
-                    Depois (produção):
-                    Troque o file.transferTo(...) por um amazonS3Client.putObject(...).
-                    O campo caminhoArquivo poderá conter a URL pública do S3.
-                * */
+            s3Service.uploadFile(bucketName, keyName, file);
         } catch (IOException e) {
             throw new RuntimeException("Erro ao salvar arquivo", e);
         }
 
-
         Documento doc = new Documento();
         doc.setNomeArquivo(file.getOriginalFilename());
-        doc.setCaminhoArquivo(uploadDir + "/" + file.getOriginalFilename());
+        doc.setCaminhoArquivo(keyName);
         doc.setStatus(StatusDocumento.PENDENTE);
         doc.setProjeto(projeto);
         doc.setCriadoPor(usuario);
@@ -68,7 +66,6 @@ public class DocumentoService {
 
         return toDTO(documentoRepository.save(doc));
     }
-
 
     public Documento aprovar(Long documentoId, Long aprovadorId) {
         Documento doc = documentoRepository.findById(documentoId)
@@ -83,8 +80,17 @@ public class DocumentoService {
         return documentoRepository.save(doc);
     }
 
-    public List<Documento> consultarPorProjeto(Long projetoId) {
-        return documentoRepository.findByProjetoId(projetoId);
+    public List<DocumentoDTO> consultarPorProjeto(Long projetoId) {
+
+        return projetoRepository.findById(projetoId).map(p -> {
+            List<Documento> test = p.getDocumentos();
+
+            System.out.println("test " + test.size());
+
+            List<DocumentoDTO> documentos = p.getDocumentos().stream().map(d -> this.toDTO(d)).toList();
+
+            return documentos;
+        }).orElse(new ArrayList<DocumentoDTO>());
     }
 
     public Documento novaVersao(Long documentoOriginalId, Long usuarioId, MultipartFile novaVersaoFile) {
@@ -114,13 +120,23 @@ public class DocumentoService {
         dto.setVersao(doc.getVersao());
         dto.setStatus(doc.getStatus());
 
-        if (doc.getProjeto() != null) dto.setProjetoId(doc.getProjeto().getId());
-        if (doc.getCriadoPor() != null) dto.setCriadoPorId(doc.getCriadoPor().getId());
-        if (doc.getAprovadoPor() != null) dto.setAprovadoPorId(doc.getAprovadoPor().getId());
+        if (doc.getProjeto() != null)
+            dto.setProjetoId(doc.getProjeto().getId());
+        if (doc.getCriadoPor() != null)
+            dto.setCriadoPorId(doc.getCriadoPor().getId());
+        if (doc.getAprovadoPor() != null)
+            dto.setAprovadoPorId(doc.getAprovadoPor().getId());
 
         dto.setCriadoEm(doc.getCriadoEm());
         dto.setAprovadoEm(doc.getAprovadoEm());
 
         return dto;
+    }
+
+    public Documento getDocumento(Long documentoId) {
+        Documento documento = documentoRepository.findById(documentoId)
+                .orElseThrow(() -> new RuntimeException("Documento não encontrado"));
+
+        return documento;
     }
 }
