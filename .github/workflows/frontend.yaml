@@ -39,6 +39,7 @@ jobs:
       - name: Build frontend app
         run: |
           cd frontend
+          rm -f .env
           echo VITE_API_URL=${{ secrets.API_URL }} > .env
           npm run build
 
