@@ -36,10 +36,10 @@ jobs:
           cd frontend
           npm install
 
-      - name: Build frontend Boot app
+      - name: Build frontend app
         run: |
           cd frontend
-          echo 'VITE_API_URL=${{ secrets.API_URL }}' > .env
+          echo VITE_API_URL=${{ secrets.API_URL }} > .env
           npm run build
 
       - name: Log in to Docker Hub
