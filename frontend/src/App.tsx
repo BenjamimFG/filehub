@@ -53,8 +53,7 @@ const PrivateRoutes = () => (
     <Route path="/projects/:id" element={<ProjectDetails />} />
     <Route path="/documents" element={<DocumentsPage />} />
     <Route path="/users" element={<UsersPage />} />
-    <Route path="/roles" element={<RolesPage />} />
-    <Route path="/permissions" element={<PermissionsPage />} />
+
     
     {/* Rota 404 para caminhos não encontrados dentro da área privada */}
     <Route path="*" element={<NotFound />} />

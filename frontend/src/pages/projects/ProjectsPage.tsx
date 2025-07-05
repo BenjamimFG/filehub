@@ -109,6 +109,7 @@ const ProjectsPage: React.FC = () => {
   const [selectedProject, setSelectedProject] = useState<Projeto | null>(null);
 
   const [projectName, setProjectName] = useState('');
+  const [projectCriadorId, setProjectCriadorId] = useState(null);
   const [selectedUsuarios, setSelectedUsuarios] = useState<Usuario[]>([]);
   const [selectedAprovadores, setSelectedAprovadores] = useState<Usuario[]>([]);
   
@@ -138,6 +139,7 @@ const ProjectsPage: React.FC = () => {
 
   const resetFormState = () => {
     setProjectName('');
+    setProjectCriadorId(null);
     setSelectedUsuarios([]);
     setSelectedAprovadores([]);
     setSelectedProject(null);
@@ -167,6 +169,7 @@ const ProjectsPage: React.FC = () => {
   const handleOpenEditModal = (project: Projeto) => {
     setSelectedProject(project);
     setProjectName(project.nome);
+    setProjectCriadorId(project.criadorId);
     // Para edição, precisamos encontrar os objetos de usuário completos a partir dos IDs
     setSelectedUsuarios(allUsers.filter(u => project.usuariosIds.includes(u.id)));
     setSelectedAprovadores(allUsers.filter(u => project.aprovadoresIds.includes(u.id)));
@@ -179,6 +182,7 @@ const ProjectsPage: React.FC = () => {
 
     const payload = {
         nome: projectName,
+        criadorId: projectCriadorId,
         usuariosIds: selectedUsuarios.map(u => u.id),
         aprovadoresIds: selectedAprovadores.map(u => u.id),
     };

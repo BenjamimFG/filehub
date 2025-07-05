@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,42 +16,37 @@ import {
   Table 
 } from '@/components/ui/table';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
 import {
   AlertCircle,
+  Calendar,
+  Clock,
   Pencil,
-  Plus,
   Upload,
   User,
+  ShieldCheck,
+  Users,
 } from 'lucide-react';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
-import { projectsApi, documentsApi, Projeto, Documento } from '@/lib/api'; // Importando da API
+import { projectsApi, documentsApi, usersApi, Projeto, Documento, Usuario } from '@/lib/api';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 const ProjectDetails: React.FC = () => {
-  const { projectId } = useParams<{ projectId: string }>();
+   const pathParts = location.pathname.split('/');
+  const projectId = pathParts[pathParts.length - 1];
   const { hasPermission } = useAuth();
   
-  // Estados para os dados da API
   const [project, setProject] = useState<Projeto | null>(null);
+  const [allUsers, setAllUsers] = useState<Usuario[]>([]);
   const [documents, setDocuments] = useState<Documento[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Estados para controle da UI
   const [activeTab, setActiveTab] = useState('overview');
   const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
 
@@ -66,12 +61,14 @@ const ProjectDetails: React.FC = () => {
       try {
         setIsLoading(true);
         setError(null);
-        // Busca os dados do projeto e dos documentos em paralelo
-        const [projectData, documentsData] = await Promise.all([
+        // Busca os dados do projeto, todos os utilizadores e os documentos em paralelo
+        const [projectData, usersData, documentsData] = await Promise.all([
           projectsApi.getProjectById(projectId),
+          usersApi.getUsers(),
           documentsApi.getDocumentsByProjectId(projectId)
         ]);
         setProject(projectData);
+        setAllUsers(usersData);
         setDocuments(documentsData);
       } catch (err: any) {
         setError(err.message);
@@ -83,12 +80,27 @@ const ProjectDetails: React.FC = () => {
     loadProjectDetails();
   }, [projectId]);
 
-  // Renderiza o estado de carregamento
+  // CORREÇÃO: Usa useMemo para derivar os objetos de utilizador a partir dos IDs de forma eficiente.
+  const criador = useMemo(() => {
+    if (!project) return null;
+    return allUsers.find(u => u.id === project.criadorId);
+  }, [project, allUsers]);
+
+  const usuarios = useMemo(() => {
+    if (!project || !project.usuariosIds) return [];
+    return allUsers.filter(u => project.usuariosIds.includes(u.id));
+  }, [project, allUsers]);
+
+  const aprovadores = useMemo(() => {
+    if (!project || !project.aprovadoresIds) return [];
+    return allUsers.filter(u => project.aprovadoresIds.includes(u.id));
+  }, [project, allUsers]);
+
+
   if (isLoading) {
-    return <AppLayout><div>Carregando detalhes do projeto...</div></AppLayout>;
+    return <AppLayout><div>A carregar detalhes do projeto...</div></AppLayout>;
   }
 
-  // Renderiza o estado de erro ou se o projeto não for encontrado
   if (error || !project) {
     return (
       <AppLayout>
@@ -108,8 +120,6 @@ const ProjectDetails: React.FC = () => {
     );
   }
 
-  const { criador, usuarios, aprovadores } = project;
-
   return (
     <AppLayout>
       <div className="space-y-6">
@@ -125,7 +135,6 @@ const ProjectDetails: React.FC = () => {
             <h2 className="mt-1 text-3xl font-bold tracking-tight">{project.nome}</h2>
           </div>
           <div className="ml-auto flex flex-wrap gap-2">
-            {/* O campo 'status' foi removido pois não existe no schema da API */}
             {hasPermission('manage_projects') && (
               <Button variant="outline" size="sm">
                 <Pencil className="mr-2 h-4 w-4" />
@@ -162,19 +171,21 @@ const ProjectDetails: React.FC = () => {
                 </CardHeader>
                 <CardContent>
                     <div className="space-y-4">
-                        {/* O campo 'description' e as datas foram removidos pois não existem no schema da API */}
-                        <div>
-                            <h4 className="text-sm font-medium text-muted-foreground">Criador</h4>
-                            <div className="mt-2 flex items-center gap-2">
-                                <Avatar className="h-8 w-8">
-                                    <AvatarFallback>{criador.nome.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div>
-                                    <p className="text-sm font-medium">{criador.nome}</p>
-                                    <p className="text-xs text-muted-foreground">{criador.email}</p>
+                        <Separator />
+                        {criador && (
+                            <div>
+                                <h4 className="text-sm font-medium text-muted-foreground">Criador</h4>
+                                <div className="mt-2 flex items-center gap-2">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarFallback>{criador.nome.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <p className="text-sm font-medium">{criador.nome}</p>
+                                        <p className="text-xs text-muted-foreground">{criador.email}</p>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </CardContent>
             </Card>
@@ -184,31 +195,55 @@ const ProjectDetails: React.FC = () => {
             {/* Tabela de Documentos */}
           </TabsContent>
 
-          <TabsContent value="team">
+          <TabsContent value="team" className="space-y-4">
             <Card>
                 <CardHeader>
-                    <CardTitle>Equipe do Projeto</CardTitle>
+                    <CardTitle className="flex items-center"><ShieldCheck className="mr-2 h-5 w-5 text-blue-500" />Aprovadores</CardTitle>
+                    <CardDescription>Utilizadores com permissão para aprovar itens neste projeto.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>Usuário</TableHead>
+                                <TableHead>Utilizador</TableHead>
                                 <TableHead>Email</TableHead>
-                                <TableHead>Perfil</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {/* Renderiza a lista de usuários e aprovadores */}
-                            {[...usuarios, ...aprovadores].map(member => (
+                            {aprovadores.length > 0 ? aprovadores.map(member => (
                                 <TableRow key={member.id}>
                                     <TableCell>{member.nome}</TableCell>
                                     <TableCell>{member.email}</TableCell>
-                                    <TableCell>
-                                        <Badge variant="outline">{member.perfil}</Badge>
-                                    </TableCell>
                                 </TableRow>
-                            ))}
+                            )) : (
+                                <TableRow><TableCell colSpan={2} className="text-center h-24">Nenhum aprovador atribuído.</TableCell></TableRow>
+                            )}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center"><Users className="mr-2 h-5 w-5 text-gray-500" />Usuários</CardTitle>
+                    <CardDescription>Membros da equipa com acesso geral ao projeto.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Utilizador</TableHead>
+                                <TableHead>Email</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {usuarios.length > 0 ? usuarios.map(member => (
+                                <TableRow key={member.id}>
+                                    <TableCell>{member.nome}</TableCell>
+                                    <TableCell>{member.email}</TableCell>
+                                </TableRow>
+                            )) : (
+                                <TableRow><TableCell colSpan={2} className="text-center h-24">Nenhum usuário atribuído.</TableCell></TableRow>
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>
