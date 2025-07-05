@@ -116,13 +116,18 @@ public class ProjetoService {
                 return toDTO(projetoRepository.save(projeto));
         }
 
-        public ProjetoResponseDTO adicionarAprovador(Long projetoId, Long usuarioId) {
+        public ProjetoResponseDTO adicionarAprovador(Long projetoId, List<Long> usuarioId) {
                 Projeto projeto = projetoRepository.findById(projetoId)
                                 .orElseThrow(() -> new RuntimeException("Projeto não encontrado"));
-                Usuario usuario = usuarioRepository.findById(usuarioId)
-                                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-                projeto.getAprovadores().add(usuario);
-                projeto.getUsuarios().remove(usuario);
+
+                for (var id : usuarioId) {
+                        Usuario usuario = usuarioRepository.findById(id)
+                                        .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
+
+                        projeto.getAprovadores().add(usuario);
+                        projeto.getUsuarios().remove(usuario);
+                }
+
                 return toDTO(projetoRepository.save(projeto));
         }
 
