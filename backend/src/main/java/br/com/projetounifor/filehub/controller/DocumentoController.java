@@ -128,7 +128,10 @@ public class DocumentoController {
                 boolean userInProject = p.getUsuarios().stream().filter(u -> u.getId() == userId).findFirst()
                                 .isPresent();
 
-                if (!userInProject && p.getCriador().getId() != userId) {
+                boolean userIsOwner = p.getCriador().getId().equals(userId);
+
+                if (!userIsOwner && !userInProject) {
+                        System.out.println("returning 403");
                         return ResponseEntity.status(403).build();
                 }
 
