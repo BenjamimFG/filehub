@@ -47,7 +47,7 @@ public class DocumentoService {
         }
 
         String bucketName = "filehub-document-bucket";
-        String keyName = file.getOriginalFilename() + UUID.randomUUID();
+        String keyName = UUID.randomUUID() + file.getOriginalFilename();
 
         try {
             s3Service.uploadFile(bucketName, keyName, file);
