@@ -1,20 +1,33 @@
-import React from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { CalendarIcon, FileIcon, Users } from 'lucide-react';
-import AppLayout from '@/components/layout/AppLayout';
-import { mockProjects } from '@/data/mockProjects';
-import { mockDocuments } from '@/data/mockDocuments';
-import { mockUsers } from '@/data/mockUsers';
-import { Progress } from '@/components/ui/progress';
+import React from "react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CalendarIcon, FileIcon, Users } from "lucide-react";
+import AppLayout from "@/components/layout/AppLayout";
+import { mockProjects } from "@/data/mockProjects";
+import { mockDocuments } from "@/data/mockDocuments";
+import { mockUsers } from "@/data/mockUsers";
+import { Progress } from "@/components/ui/progress";
 
 const Dashboard: React.FC = () => {
   // Calculate some stats for the dashboard
-  const activeProjects = mockProjects.filter(p => p.status === 'Ativo').length;
-  const completedProjects = mockProjects.filter(p => p.status === 'Concluído').length;
-  const activeUsers = mockUsers.filter(u => u.status === 'Ativo').length;
+  const activeProjects = mockProjects.filter(
+    (p) => p.status === "Ativo"
+  ).length;
+  const completedProjects = mockProjects.filter(
+    (p) => p.status === "Concluído"
+  ).length;
+  const activeUsers = mockUsers.filter((u) => u.status === "Ativo").length;
   const recentDocuments = [...mockDocuments]
-    .sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime())
+    .sort(
+      (a, b) =>
+        new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()
+    )
     .slice(0, 5);
 
   return (
@@ -25,74 +38,13 @@ const Dashboard: React.FC = () => {
           <div className="ml-auto flex items-center gap-2">
             <CalendarIcon className="h-4 w-4 opacity-50" />
             <span className="text-sm text-muted-foreground">
-              {new Date().toLocaleDateString('pt-BR', {
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric',
+              {new Date().toLocaleDateString("pt-BR", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
               })}
             </span>
           </div>
-        </div>
-
-        {/* Overview Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Projetos</CardTitle>
-              <div className="rounded-full bg-primary/10 p-1">
-                <FileIcon className="h-4 w-4 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{mockProjects.length}</div>
-              <p className="text-xs text-muted-foreground">
-                {activeProjects} ativos, {completedProjects} concluídos
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Documentos</CardTitle>
-              <div className="rounded-full bg-primary/10 p-1">
-                <FileIcon className="h-4 w-4 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{mockDocuments.length}</div>
-              <p className="text-xs text-muted-foreground">
-                {mockDocuments.filter(d => d.version > 1).length} com múltiplas versões
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Usuários</CardTitle>
-              <div className="rounded-full bg-primary/10 p-1">
-                <Users className="h-4 w-4 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{mockUsers.length}</div>
-              <p className="text-xs text-muted-foreground">
-                {activeUsers} ativos, {mockUsers.length - activeUsers} inativos
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Taxa de Conclusão</CardTitle>
-              <div className="rounded-full bg-primary/10 p-1">
-                <CalendarIcon className="h-4 w-4 text-primary" />
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{Math.round((completedProjects / mockProjects.length) * 100)}%</div>
-              <Progress value={(completedProjects / mockProjects.length) * 100} className="h-2" />
-            </CardContent>
-          </Card>
         </div>
 
         <Tabs defaultValue="projects" className="space-y-4">
@@ -100,7 +52,7 @@ const Dashboard: React.FC = () => {
             <TabsTrigger value="projects">Projetos Recentes</TabsTrigger>
             <TabsTrigger value="documents">Documentos Recentes</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="projects" className="space-y-4">
             <Card>
               <CardHeader>
@@ -115,41 +67,65 @@ const Dashboard: React.FC = () => {
                     <thead>
                       <tr className="border-b text-left">
                         <th className="px-4 py-3 text-sm font-medium">Nome</th>
-                        <th className="px-4 py-3 text-sm font-medium">Status</th>
-                        <th className="px-4 py-3 text-sm font-medium">Data de Início</th>
-                        <th className="px-4 py-3 text-sm font-medium">Data de Término</th>
+                        <th className="px-4 py-3 text-sm font-medium">
+                          Status
+                        </th>
+                        <th className="px-4 py-3 text-sm font-medium">
+                          Data de Início
+                        </th>
+                        <th className="px-4 py-3 text-sm font-medium">
+                          Data de Término
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {[...mockProjects]
-                        .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+                        .sort(
+                          (a, b) =>
+                            new Date(b.createdAt).getTime() -
+                            new Date(a.createdAt).getTime()
+                        )
                         .slice(0, 5)
                         .map((project) => (
-                          <tr key={project.id} className="border-b transition-colors hover:bg-muted/50">
-                            <td className="px-4 py-3 text-sm">{project.name}</td>
+                          <tr
+                            key={project.id}
+                            className="border-b transition-colors hover:bg-muted/50"
+                          >
                             <td className="px-4 py-3 text-sm">
-                              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                                project.status === 'Ativo' 
-                                  ? 'bg-green-50 text-green-700' 
-                                  : project.status === 'Concluído' 
-                                  ? 'bg-blue-50 text-blue-700' 
-                                  : 'bg-yellow-50 text-yellow-700'
-                              }`}>
+                              {project.name}
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              <span
+                                className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                                  project.status === "Ativo"
+                                    ? "bg-green-50 text-green-700"
+                                    : project.status === "Concluído"
+                                    ? "bg-blue-50 text-blue-700"
+                                    : "bg-yellow-50 text-yellow-700"
+                                }`}
+                              >
                                 {project.status}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-sm">{new Date(project.startDate).toLocaleDateString('pt-BR')}</td>
-                            <td className="px-4 py-3 text-sm">{new Date(project.endDate).toLocaleDateString('pt-BR')}</td>
+                            <td className="px-4 py-3 text-sm">
+                              {new Date(project.startDate).toLocaleDateString(
+                                "pt-BR"
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-sm">
+                              {new Date(project.endDate).toLocaleDateString(
+                                "pt-BR"
+                              )}
+                            </td>
                           </tr>
-                        ))
-                      }
+                        ))}
                     </tbody>
                   </table>
                 </div>
               </CardContent>
             </Card>
           </TabsContent>
-          
+
           <TabsContent value="documents" className="space-y-4">
             <Card>
               <CardHeader>
@@ -165,13 +141,20 @@ const Dashboard: React.FC = () => {
                       <tr className="border-b text-left">
                         <th className="px-4 py-3 text-sm font-medium">Nome</th>
                         <th className="px-4 py-3 text-sm font-medium">Tipo</th>
-                        <th className="px-4 py-3 text-sm font-medium">Tamanho</th>
-                        <th className="px-4 py-3 text-sm font-medium">Data de Upload</th>
+                        <th className="px-4 py-3 text-sm font-medium">
+                          Tamanho
+                        </th>
+                        <th className="px-4 py-3 text-sm font-medium">
+                          Data de Upload
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
                       {recentDocuments.map((document) => (
-                        <tr key={document.id} className="border-b transition-colors hover:bg-muted/50">
+                        <tr
+                          key={document.id}
+                          className="border-b transition-colors hover:bg-muted/50"
+                        >
                           <td className="px-4 py-3 text-sm">{document.name}</td>
                           <td className="px-4 py-3 text-sm">
                             <span className="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-gray-100 text-gray-800">
@@ -179,7 +162,11 @@ const Dashboard: React.FC = () => {
                             </span>
                           </td>
                           <td className="px-4 py-3 text-sm">{document.size}</td>
-                          <td className="px-4 py-3 text-sm">{new Date(document.uploadDate).toLocaleDateString('pt-BR')}</td>
+                          <td className="px-4 py-3 text-sm">
+                            {new Date(document.uploadDate).toLocaleDateString(
+                              "pt-BR"
+                            )}
+                          </td>
                         </tr>
                       ))}
                     </tbody>

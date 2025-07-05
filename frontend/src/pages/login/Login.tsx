@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -7,20 +7,22 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { KeyRound, Loader2 } from 'lucide-react';
-import CryptoJS from 'crypto-js';
-import { useAuth } from '@/contexts/AuthContext'; // 1. Importe o hook useAuth
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { KeyRound, Loader2 } from "lucide-react";
+import CryptoJS from "crypto-js";
+import { useAuth } from "@/contexts/AuthContext"; // 1. Importe o hook useAuth
 
-const ENCRYPTION_KEY = import.meta.env.VITE_ENCRYPTION_KEY || 'default-super-secret-key-for-dev';
+const ENCRYPTION_KEY =
+  import.meta.env.VITE_ENCRYPTION_KEY || "default-super-secret-key-for-dev";
 
 // --- Interfaces para tipar a resposta da API ---
 interface UserData {
   id: number;
   nome: string;
-  perfil: 'ADMIN' | 'APROVADOR' | 'USUARIO';
+  perfil: "ADMIN" | "APROVADOR" | "USUARIO";
+  email: string;
   repositoriosMembro: number[];
 }
 
@@ -28,11 +30,10 @@ interface LoginApiResponse extends UserData {
   token: string;
 }
 
-
 const Login: React.FC = () => {
-  const { login } = useAuth(); // 2. Obtenha a função de login do contexto
-  const [username, setUsername] = useState('');
-  const [senha, setSenha] = useState('');
+  const { login, user } = useAuth(); // 2. Obtenha a função de login do contexto
+  const [username, setUsername] = useState("");
+  const [senha, setSenha] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -42,11 +43,11 @@ const Login: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch('http://localhost:8080/auth/login', {
-        method: 'POST',
+      const response = await fetch("http://localhost:8080/auth/login", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
-          'accept': '*/*',
+          "Content-Type": "application/json",
+          accept: "*/*",
         },
         body: JSON.stringify({
           username,
@@ -54,33 +55,38 @@ const Login: React.FC = () => {
         }),
       });
 
-      const data: LoginApiResponse | { message: string } = await response.json();
-
       if (!response.ok) {
-        const errorMessage = (data as { message: string }).message || 'Falha na autenticação.';
-        throw new Error(errorMessage);
+        if (response.status === 401)
+          throw new Error("Usuário ou senha inválidos");
+        else throw new Error("Falha na autenticação");
       }
-      
+
+      const data: LoginApiResponse | { message: string } =
+        await response.json();
+
       const responseData = data as LoginApiResponse;
 
       if (responseData.token) {
         // --- ARMAZENAMENTO ATUALIZADO ---
 
         // 1. Criptografa e armazena o token como antes.
-        const encryptedToken = CryptoJS.AES.encrypt(responseData.token, ENCRYPTION_KEY).toString();
-        localStorage.setItem('authToken', encryptedToken);
+        const encryptedToken = CryptoJS.AES.encrypt(
+          responseData.token,
+          ENCRYPTION_KEY
+        ).toString();
+        localStorage.setItem("authToken", encryptedToken);
 
         // 2. CHAMA A FUNÇÃO DE LOGIN DO CONTEXTO
         // Isso irá definir o usuário no estado global e também salvá-lo no localStorage.
         login(responseData);
 
+        console.log("user", user);
+
         // 3. Redireciona para o dashboard.
-        window.location.href = '/dashboard';
-
+        window.location.href = "/dashboard";
       } else {
-        throw new Error('Token não recebido do servidor.');
+        throw new Error("Token não recebido do servidor.");
       }
-
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -137,7 +143,7 @@ const Login: React.FC = () => {
                   Entrando...
                 </>
               ) : (
-                'Entrar'
+                "Entrar"
               )}
             </Button>
           </CardFooter>

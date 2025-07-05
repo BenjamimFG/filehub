@@ -1,10 +1,17 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from "react";
 
 // Interface para os dados do usuário que serão armazenados
 interface User {
   id: number;
   nome: string;
-  perfil: 'ADMIN' | 'APROVADOR' | 'USUARIO';
+  perfil: "ADMIN" | "APROVADOR" | "USUARIO";
+  email: string;
   // Em um app real, a API poderia retornar uma lista de permissões explícitas.
   // Por agora, vamos derivá-las do perfil.
   permissions: string[];
@@ -24,24 +31,39 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // Função auxiliar para determinar as permissões com base no perfil
 const getPermissionsForProfile = (profile: string): string[] => {
   switch (profile) {
-    case 'ADMIN':
+    case "ADMIN":
       // ADMIN tem acesso a tudo
-      return ['manage_users', 'manage_roles', 'manage_projects', 'manage_documents', 'approve_document'];
-    case 'APROVADOR':
-      return ['view_assigned_projects', 'upload_my_documents', 'approve_document'];
-    case 'USUARIO':
-      return ['view_assigned_projects', 'upload_my_documents', 'approve_document'];
+      return [
+        "manage_users",
+        "manage_roles",
+        "manage_projects",
+        "manage_documents",
+        "approve_document",
+      ];
+    case "APROVADOR":
+      return [
+        "view_assigned_projects",
+        "upload_my_documents",
+        "approve_document",
+      ];
+    case "USUARIO":
+      return [
+        "view_assigned_projects",
+        "upload_my_documents",
+        "approve_document",
+      ];
     default:
       return [];
   }
 };
 
-
-export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const AuthProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [user, setUser] = useState<User | null>(null);
 
   useEffect(() => {
-    const storedData = localStorage.getItem('userData');
+    const storedData = localStorage.getItem("userData");
     if (storedData) {
       try {
         const parsedData = JSON.parse(storedData);
@@ -59,13 +81,13 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     const permissions = getPermissionsForProfile(userData.perfil);
     const fullUserData = { ...userData, permissions };
     setUser(fullUserData);
-    localStorage.setItem('userData', JSON.stringify(fullUserData));
+    localStorage.setItem("userData", JSON.stringify(fullUserData));
   };
 
   const logout = () => {
     setUser(null);
-    localStorage.removeItem('userData');
-    localStorage.removeItem('authToken');
+    localStorage.removeItem("userData");
+    localStorage.removeItem("authToken");
   };
 
   /**
@@ -74,7 +96,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   const hasPermission = (permissionKey: string): boolean => {
     if (!user) return false;
     // O perfil ADMIN sempre tem permissão para tudo.
-    if (user.perfil === 'ADMIN') return true;
+    if (user.perfil === "ADMIN") return true;
     return user.permissions.includes(permissionKey);
   };
 
@@ -96,7 +118,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth deve ser usado dentro de um AuthProvider');
+    throw new Error("useAuth deve ser usado dentro de um AuthProvider");
   }
   return context;
 };
