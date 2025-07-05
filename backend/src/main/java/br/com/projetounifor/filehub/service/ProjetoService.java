@@ -70,24 +70,30 @@ public class ProjetoService {
                 .orElseThrow(() -> new NoSuchElementException("Projeto não encontrado com id: " + id));
     }
 
-    // Atualizar projeto por ID
-    public ProjetoResponseDTO atualizar(Long id, ProjetoRequestDTO dto) {
-        Projeto projetoExistente = buscarPorId(id);
+	// Atualizar projeto por ID
+	public ProjetoResponseDTO atualizar(Long id, ProjetoRequestDTO dto) {
+		Projeto projetoExistente = buscarPorId(id);
 
-        Usuario criador = usuarioRepository.findById(dto.getCriadorId())
-                .orElseThrow(() -> new RuntimeException("Usuário criador não encontrado"));
+		Usuario criador = usuarioRepository.findById(dto.getCriadorId())
+				.orElseThrow(() -> new RuntimeException("Usuário criador não encontrado"));
 
-        projetoExistente.setNome(dto.getNome());
-        projetoExistente.setCriador(criador);
-        projetoExistente.setUsuarios(dto.getUsuariosIds() != null 
-                ? new HashSet<>(usuarioRepository.findAllById(dto.getUsuariosIds())) 
-                : new HashSet<>());
-        projetoExistente.setAprovadores(dto.getAprovadoresIds() != null 
-                ? new HashSet<>(usuarioRepository.findAllById(dto.getAprovadoresIds())) 
-                : new HashSet<>());
+		if (dto.getNome() != null) {
+			projetoExistente.setNome(dto.getNome());
+		}
+		
+		if(!projetoExistente.getCriador().getId().equals(dto.getCriadorId())) {
+			projetoExistente.setCriador(criador);
+		}
+		
+		projetoExistente.setUsuarios(
+				dto.getUsuariosIds() != null ? new HashSet<>(usuarioRepository.findAllById(dto.getUsuariosIds()))
+						: new HashSet<>());
+		projetoExistente.setAprovadores(
+				dto.getAprovadoresIds() != null ? new HashSet<>(usuarioRepository.findAllById(dto.getAprovadoresIds()))
+						: new HashSet<>());
 
-        return toDTO(projetoRepository.save(projetoExistente));
-    }
+		return toDTO(projetoRepository.save(projetoExistente));
+	}
 
     // Deletar projeto por ID
     public void deletar(Long id) {
@@ -116,13 +122,19 @@ public class ProjetoService {
         return toDTO(projetoRepository.save(projeto));
     }
 
-    public ProjetoResponseDTO adicionarAprovador(Long projetoId, Long usuarioId) {
+    public ProjetoResponseDTO adicionarAprovador(Long projetoId, List<Long> usuarioIds) {
         Projeto projeto = projetoRepository.findById(projetoId)
                 .orElseThrow(() -> new RuntimeException("Projeto não encontrado"));
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
-        projeto.getAprovadores().add(usuario);
-        projeto.getUsuarios().remove(usuario);
+        List<Usuario> usuarios = usuarioRepository.findAllById(usuarioIds);
+        if (usuarios.size() != usuarioIds.size()) {
+            throw new RuntimeException("Um ou mais usuários não encontrados");
+        }
+        
+        usuarios.forEach(usuario -> {
+            projeto.getAprovadores().add(usuario);
+            projeto.getUsuarios().remove(usuario);
+        });
+        
         return toDTO(projetoRepository.save(projeto));
     }
 

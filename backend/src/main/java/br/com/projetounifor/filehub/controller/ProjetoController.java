@@ -150,7 +150,7 @@ public class ProjetoController {
     })
     public ResponseEntity<ProjetoResponseDTO> adicionarAprovador(
             @PathVariable Long id,
-            @PathVariable Long usuarioId
+            @PathVariable List<Long> usuarioId
     ) {
         ProjetoResponseDTO projetoAtualizado = projetoService.adicionarAprovador(id, usuarioId);
         return ResponseEntity.ok(projetoAtualizado);
