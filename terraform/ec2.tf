@@ -49,6 +49,28 @@ resource "aws_instance" "filehub_api_ec2" {
   EOF
 }
 
-output "backend_ip" {
+resource "aws_instance" "filehub_front_ec2" {
+  ami                    = "ami-034568121cfdea9c3" # Ubuntu 24.04 LTS
+  instance_type          = var.instance_type
+  key_name               = aws_key_pair.deployer.key_name
+  vpc_security_group_ids = [aws_security_group.allow_ssh_http.id]
+
+  user_data = <<-EOF
+    #!/bin/bash
+    apt update -y
+    apt install docker.io -y
+
+    usermod -aG docker ubuntu
+
+    systemctl enable docker.service
+    systemctl start docker.service
+  EOF
+}
+
+output "backend_url" {
   value = aws_instance.filehub_api_ec2.public_dns
+}
+
+output "frontend_url" {
+  value = aws_instance.filehub_front_ec2.public_dns
 }

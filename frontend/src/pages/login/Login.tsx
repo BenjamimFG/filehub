@@ -13,6 +13,7 @@ import { Label } from "@/components/ui/label";
 import { KeyRound, Loader2 } from "lucide-react";
 import CryptoJS from "crypto-js";
 import { useAuth } from "@/contexts/AuthContext"; // 1. Importe o hook useAuth
+import { API_BASE_URL } from "@/lib/api";
 
 const ENCRYPTION_KEY =
   import.meta.env.VITE_ENCRYPTION_KEY || "default-super-secret-key-for-dev";
@@ -43,7 +44,7 @@ const Login: React.FC = () => {
     setError(null);
 
     try {
-      const response = await fetch("http://localhost:8080/auth/login", {
+      const response = await fetch(API_BASE_URL + "/auth/login", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
