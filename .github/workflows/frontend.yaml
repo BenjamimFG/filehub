@@ -40,7 +40,7 @@ jobs:
         run: |
           cd frontend
           rm -f .env
-          echo VITE_API_URL=${{ secrets.API_URL }} > .env
+          echo VITE_API_URL=http://${{ secrets.API_URL }} > .env
           npm run build
 
       - name: Log in to Docker Hub
