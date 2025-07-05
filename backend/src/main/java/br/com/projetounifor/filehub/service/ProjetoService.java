@@ -74,16 +74,18 @@ public class ProjetoService {
 	public ProjetoResponseDTO atualizar(Long id, ProjetoRequestDTO dto) {
 		Projeto projetoExistente = buscarPorId(id);
 
-		Usuario criador = usuarioRepository.findById(dto.getCriadorId())
-				.orElseThrow(() -> new RuntimeException("Usuário criador não encontrado"));
-
 		if (dto.getNome() != null) {
 			projetoExistente.setNome(dto.getNome());
 		}
 		
-		if(!projetoExistente.getCriador().getId().equals(dto.getCriadorId())) {
-			projetoExistente.setCriador(criador);
-		}
+		// Atualizar criador, se fornecido e diferente do atual
+        if (dto.getCriadorId() != null) {
+            Usuario criador = usuarioRepository.findById(dto.getCriadorId())
+                    .orElseThrow(() -> new RuntimeException("Usuário criador não encontrado"));
+            if (!criador.getId().equals(projetoExistente.getCriador().getId())) {
+                projetoExistente.setCriador(criador);
+            }
+        }
 		
 		projetoExistente.setUsuarios(
 				dto.getUsuariosIds() != null ? new HashSet<>(usuarioRepository.findAllById(dto.getUsuariosIds()))
