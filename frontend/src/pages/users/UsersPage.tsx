@@ -46,7 +46,7 @@ import {
   Lock,
 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
-import { usersApi, rolesApi, Usuario, Role } from '@/lib/api';
+import { usersApi, rolesApi, Usuario, Role, CreateUserDto } from '@/lib/api';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Label } from '@/components/ui/label';
 
@@ -65,8 +65,8 @@ const UsersPage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isResetPassModalOpen, setIsResetPassModalOpen] = useState(false);
+  const [isNewUserModalOpen, setIsNewUserModalOpen] = useState(false);
 
-  // Função para recarregar os dados
   const fetchData = async (isInitialLoad = false) => {
     if (isInitialLoad) setIsLoading(true);
     try {
@@ -90,11 +90,39 @@ const UsersPage: React.FC = () => {
       return;
     }
     
-    fetchData(true); // Carga inicial
-    const intervalId = setInterval(() => fetchData(false), 30000); // Atualiza a cada 30s
+    fetchData(true);
+    const intervalId = setInterval(() => fetchData(false), 30000);
 
-    return () => clearInterval(intervalId); // Limpa o intervalo ao desmontar
+    return () => clearInterval(intervalId);
   }, [hasPermission]);
+
+  const handleCreateUser = async (event: React.FormEvent) => {
+    event.preventDefault();
+    const formData = new FormData(event.target as HTMLFormElement);
+    const senha = formData.get('senha') as string;
+    const confirmarSenha = formData.get('confirmarSenha') as string;
+
+    if (senha !== confirmarSenha) {
+        alert("As senhas não coincidem!");
+        return;
+    }
+
+    const newUser: CreateUserDto = {
+        nome: formData.get('nome') as string,
+        email: formData.get('email') as string,
+        username: formData.get('username') as string,
+        senha: senha,
+        perfil: formData.get('perfil') as string,
+    };
+
+    try {
+        await usersApi.createUser(newUser);
+        setIsNewUserModalOpen(false);
+        fetchData(true);
+    } catch (createError: any) {
+        alert(`Erro ao criar usuário: ${createError.message}`);
+    }
+  };
 
   const handleUpdateUser = async (event: React.FormEvent) => {
     event.preventDefault();
@@ -110,7 +138,7 @@ const UsersPage: React.FC = () => {
     try {
       await usersApi.updateUser(selectedUser.id, updatedData);
       setIsEditModalOpen(false);
-      fetchData(true); // Recarrega a lista com loading
+      fetchData(true);
     } catch (updateError: any) {
       alert(`Erro ao atualizar: ${updateError.message}`);
     }
@@ -121,7 +149,7 @@ const UsersPage: React.FC = () => {
     try {
         await usersApi.deleteUser(selectedUser.id);
         setIsDeleteModalOpen(false);
-        fetchData(true); // Recarrega a lista com loading
+        fetchData(true);
     } catch (deleteError: any) {
         alert(`Erro ao excluir: ${deleteError.message}`);
     }
@@ -161,7 +189,6 @@ const UsersPage: React.FC = () => {
   return (
     <AppLayout>
       <div className="space-y-6">
-        {/* Header e Filtros */}
         <div className="flex items-center">
           <h2 className="text-3xl font-bold tracking-tight">Usuários</h2>
           <div className="ml-auto flex items-center gap-2">
@@ -183,6 +210,61 @@ const UsersPage: React.FC = () => {
                     ))}
                 </SelectContent>
             </Select>
+            {hasPermission('manage_users') && (
+              <Dialog open={isNewUserModalOpen} onOpenChange={setIsNewUserModalOpen}>
+                <DialogTrigger asChild>
+                  <Button>
+                    <UserPlus className="mr-2 h-4 w-4" />
+                    Novo Usuário
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Criar Novo Usuário</DialogTitle>
+                    <DialogDescription>
+                      Preencha os dados para criar um novo acesso ao sistema.
+                    </DialogDescription>
+                  </DialogHeader>
+                  <form onSubmit={handleCreateUser}>
+                    <div className="grid gap-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="nome">Nome Completo</Label>
+                        <Input id="nome" name="nome" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="email">E-mail</Label>
+                        <Input id="email" name="email" type="email" required />
+                      </div>
+                       <div className="space-y-2">
+                        <Label htmlFor="username">Username</Label>
+                        <Input id="username" name="username" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="senha">Senha</Label>
+                        <Input id="senha" name="senha" type="password" required />
+                      </div>
+                       <div className="space-y-2">
+                        <Label htmlFor="confirmarSenha">Confirmar Senha</Label>
+                        <Input id="confirmarSenha" name="confirmarSenha" type="password" required />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="perfil">Perfil</Label>
+                        <Select name="perfil" required>
+                            <SelectTrigger><SelectValue placeholder="Selecione um perfil" /></SelectTrigger>
+                            <SelectContent>
+                                {roles.map(role => <SelectItem key={role.id} value={role.nome}>{role.nome}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" type="button" onClick={() => setIsNewUserModalOpen(false)}>Cancelar</Button>
+                      <Button type="submit">Criar Usuário</Button>
+                    </DialogFooter>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            )}
           </div>
         </div>
 

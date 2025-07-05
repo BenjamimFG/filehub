@@ -17,21 +17,34 @@ export interface Usuario {
   // Adicione outros campos de usuário se necessário
 }
 
-
+export interface CreateUserDto {
+    nome: string;
+    email: string;
+    username: string;
+    senha: string;
+    perfil: string;
+}
 export interface Role {
   id: string;
   nome: string;
 }
 
-// Interface para o objeto Projeto, agora com a estrutura correta
+// CORREÇÃO: A interface agora reflete que a API retorna IDs na lista de projetos.
 export interface Projeto {
   id: number;
   nome: string;
-  criador: Usuario; // Objeto aninhado
-  usuarios: Usuario[]; // Array de objetos
-  aprovadores: Usuario[]; // Array de objetos
-  dataCriacao: string;
-  // Adicione outros campos do projeto que a API retorna
+  dataCriacao: string; // Mantido com base na sua imagem da API
+  criadorId: number;
+  usuariosIds: number[];
+  aprovadoresIds: number[];
+}
+
+// DTO (Data Transfer Object) para criação de projeto
+export interface CreateProjectDto {
+    nome: string;
+    criadorId: number;
+    usuariosIds: number[];
+    aprovadoresIds: number[];
 }
 
 // Outras interfaces que você possa precisar
@@ -83,12 +96,15 @@ export const projectsApi = {
     if (!response.ok) throw new Error(`Falha ao buscar projeto com ID ${id}`);
     return response.json();
   },
-  createProject: async (projectData: Omit<Projeto, 'id' | 'criador' | 'usuarios' | 'aprovadores'>): Promise<Projeto> => {
+  createProject: async (projectData: CreateProjectDto): Promise<Projeto> => {
     const response = await authenticatedFetch('/projetos', {
       method: 'POST',
       body: JSON.stringify(projectData),
     });
-    if (!response.ok) throw new Error('Falha ao criar projeto');
+    if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Falha ao criar projeto');
+    }
     return response.json();
   },
   updateProject: async (id: string, projectData: Partial<Projeto>): Promise<Projeto> => {
@@ -137,6 +153,22 @@ export const usersApi = {
         if (!response.ok) throw new Error('Falha ao buscar usuários');
         return response.json();
     },
+    getUserById: async (id: number): Promise<Usuario> => {
+        const response = await authenticatedFetch(`/usuarios/${id}`);
+        if (!response.ok) throw new Error(`Falha ao buscar usuario com ID ${id}`);
+        return response.json();
+    },
+    createUser: async (userData: CreateUserDto): Promise<Usuario> => {
+        const response = await authenticatedFetch('/usuarios', {
+            method: 'POST',
+            body: JSON.stringify(userData),
+        });
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.message || 'Falha ao criar usuário');
+        }
+        return response.json();
+    },    
     updateUser: async (id: number, userData: Partial<Pick<Usuario, 'nome' | 'email' | 'perfil'>>): Promise<Usuario> => {
         const response = await authenticatedFetch(`/usuarios/${id}`, {
             method: 'PUT',
