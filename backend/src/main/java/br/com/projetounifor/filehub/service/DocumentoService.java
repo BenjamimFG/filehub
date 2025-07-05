@@ -3,9 +3,10 @@ package br.com.projetounifor.filehub.service;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -79,18 +80,13 @@ public class DocumentoService {
         doc.setAprovadoEm(LocalDateTime.now());
         return documentoRepository.save(doc);
     }
-
+    
     public List<DocumentoDTO> consultarPorProjeto(Long projetoId) {
-
-        return projetoRepository.findById(projetoId).map(p -> {
-            List<Documento> test = p.getDocumentos();
-
-            System.out.println("test " + test.size());
-
-            List<DocumentoDTO> documentos = p.getDocumentos().stream().map(d -> this.toDTO(d)).toList();
-
-            return documentos;
-        }).orElse(new ArrayList<DocumentoDTO>());
+        List<Documento> documentos = documentoRepository.findByProjetoId(projetoId);
+        return documentos.stream()
+            .map(this::toDTO)
+            .filter(Objects::nonNull) // Possível filtro que remove null
+            .collect(Collectors.toList());
     }
 
     public Documento novaVersao(Long documentoOriginalId, Long usuarioId, MultipartFile novaVersaoFile) {

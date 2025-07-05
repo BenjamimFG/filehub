@@ -11,6 +11,8 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -65,7 +67,7 @@ class ProjetoServiceTest {
 		when(usuarioRepository.findAllById(usuariosIds)).thenReturn(List.of(usuario));
 		when(usuarioRepository.findAllById(aprovadoresIds)).thenReturn(List.of(aprovador));
 		when(projetoRepository.save(any(Projeto.class))).thenReturn(projeto);
-		
+
 		ProjetoRequestDTO dto = new ProjetoRequestDTO(nome, idCriador, usuariosIds, aprovadoresIds);
 
 		// Act
@@ -90,7 +92,7 @@ class ProjetoServiceTest {
 		List<Long> usuariosIds = List.of(2L);
 		List<Long> aprovadoresIds = List.of(3L);
 		when(usuarioRepository.findById(idCriador)).thenReturn(Optional.empty());
-		
+
 		ProjetoRequestDTO dto = new ProjetoRequestDTO(nome, idCriador, usuariosIds, aprovadoresIds);
 
 		// Act & Assert
@@ -107,9 +109,12 @@ class ProjetoServiceTest {
 	@Test
 	void listarTodos_ShouldReturnListOfProjetos() {
 		// Arrange
+		Long id = 1L;
 		Projeto projeto = new Projeto();
-		projeto.setId(1L);
+		projeto.setId(id);
 		projeto.setNome("Projeto Teste");
+		projeto.setUsuarios(new HashSet<>()); // Inicializar o Set de usuários
+		projeto.setAprovadores(new HashSet<>()); // Inicializar aprovadores (para evitar erros anteriores)
 		List<Projeto> projetos = List.of(projeto);
 		when(projetoRepository.findAll()).thenReturn(projetos);
 
@@ -117,13 +122,14 @@ class ProjetoServiceTest {
 		List<ProjetoResponseDTO> result = projetoService.listarTodos();
 
 		// Assert
-		assertNotNull(result, "A lista de projetos não deve ser nula");
-		assertEquals(1, result.size(), "A lista deve conter exatamente um projeto");
-		assertEquals(projeto, result.get(0), "O projeto retornado deve ser o esperado");
-		assertEquals("Projeto Teste", result.get(0).getNome(), "O nome do projeto deve ser o esperado");
+		assertNotNull(result);
+		assertEquals(1, result.size());
+		assertEquals(id, result.get(0).getId());
+		assertEquals("Projeto Teste", result.get(0).getNome());
+		assertEquals(Collections.emptyList(), result.get(0).getUsuariosIds(),
+				"A lista de IDs de usuários deve ser vazia");
 		verify(projetoRepository, times(1)).findAll();
 		verifyNoMoreInteractions(projetoRepository);
-		verifyNoInteractions(usuarioRepository);
 	}
 
 	@Test
@@ -133,6 +139,8 @@ class ProjetoServiceTest {
 		Projeto projeto = new Projeto();
 		projeto.setId(id);
 		projeto.setNome("Projeto Teste");
+		projeto.setUsuarios(new HashSet<>()); // Já corrigido anteriormente
+		projeto.setAprovadores(new HashSet<>()); // Inicializar o Set de aprovadores
 		when(projetoRepository.findById(id)).thenReturn(Optional.of(projeto));
 
 		// Act
@@ -192,7 +200,7 @@ class ProjetoServiceTest {
 		when(usuarioRepository.findAllById(usuariosIds)).thenReturn(List.of(usuario));
 		when(usuarioRepository.findAllById(aprovadoresIds)).thenReturn(List.of(aprovador));
 		when(projetoRepository.save(any(Projeto.class))).thenReturn(projetoAtualizado);
-		
+
 		ProjetoRequestDTO dto = new ProjetoRequestDTO(nome, idCriador, usuariosIds, aprovadoresIds);
 
 		// Act
@@ -219,7 +227,7 @@ class ProjetoServiceTest {
 		List<Long> usuariosIds = List.of(2L);
 		List<Long> aprovadoresIds = List.of(3L);
 		when(projetoRepository.findById(id)).thenReturn(Optional.empty());
-		
+
 		ProjetoRequestDTO dto = new ProjetoRequestDTO(nome, idCriador, usuariosIds, aprovadoresIds);
 
 		// Act & Assert

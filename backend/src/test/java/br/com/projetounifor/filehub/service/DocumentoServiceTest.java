@@ -4,6 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -22,6 +24,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
 import br.com.projetounifor.filehub.domain.model.Documento;
 import br.com.projetounifor.filehub.domain.model.Projeto;
@@ -47,6 +50,9 @@ class DocumentoServiceTest {
 	@InjectMocks
 	private DocumentoService documentoService;
 
+	@Mock
+	private S3Service s3Service; // Mock para S3Service
+
 	private MockMultipartFile mockFile;
 
 	@BeforeEach
@@ -66,7 +72,7 @@ class DocumentoServiceTest {
 		Documento documento = new Documento();
 		documento.setId(1L);
 		documento.setNomeArquivo("test.pdf");
-		documento.setCaminhoArquivo(System.getProperty("user.dir") + "/uploads/test.pdf");
+		documento.setCaminhoArquivo("s3://bucket/test.pdf");
 		documento.setStatus(StatusDocumento.PENDENTE);
 		documento.setProjeto(projeto);
 		documento.setCriadoPor(usuario);
@@ -75,6 +81,7 @@ class DocumentoServiceTest {
 		when(projetoRepository.findById(projetoId)).thenReturn(Optional.of(projeto));
 		when(usuarioRepository.findById(usuarioId)).thenReturn(Optional.of(usuario));
 		when(documentoRepository.save(any(Documento.class))).thenReturn(documento);
+		doNothing().when(s3Service).uploadFile(anyString(), anyString(), any(MultipartFile.class)); // Corrigido
 
 		// Act
 		DocumentoDTO result = documentoService.submeterDocumento(projetoId, usuarioId, mockFile);
@@ -89,7 +96,8 @@ class DocumentoServiceTest {
 		verify(projetoRepository, times(1)).findById(projetoId);
 		verify(usuarioRepository, times(1)).findById(usuarioId);
 		verify(documentoRepository, times(1)).save(any(Documento.class));
-		verifyNoMoreInteractions(projetoRepository, usuarioRepository, documentoRepository);
+		verify(s3Service, times(1)).uploadFile(anyString(), anyString(), any(MultipartFile.class));
+		verifyNoMoreInteractions(projetoRepository, usuarioRepository, documentoRepository, s3Service);
 	}
 
 	@Test
@@ -155,19 +163,27 @@ class DocumentoServiceTest {
 	void consultarPorProjeto_ShouldReturnListOfDocumentos() {
 		// Arrange
 		Long projetoId = 1L;
+		Projeto projeto = new Projeto();
+		projeto.setId(projetoId);
 		Documento documento = new Documento();
 		documento.setId(1L);
 		documento.setNomeArquivo("test.pdf");
+		documento.setCaminhoArquivo("s3://bucket/test.pdf");
+		documento.setStatus(StatusDocumento.PENDENTE);
+		documento.setProjeto(projeto);
+		documento.setVersao(1);
 		List<Documento> documentos = List.of(documento);
-		when(documentoRepository.findByProjetoId(projetoId)).thenReturn(documentos);
+
+		when(documentoRepository.findByProjetoId(projetoId)).thenReturn(List.of(documento));
 
 		// Act
 		List<DocumentoDTO> result = documentoService.consultarPorProjeto(projetoId);
 
 		// Assert
-		assertNotNull(result, "A lista de documentos não deve ser nula");
+		assertNotNull(result, "A lista retornada não deve ser nula");
 		assertEquals(1, result.size(), "A lista deve conter exatamente um documento");
-		assertEquals(documento, result.get(0), "O documento retornado deve ser o esperado");
+		assertEquals(1L, result.get(0).getId(), "O ID do documento deve ser o esperado");
+		assertEquals("test.pdf", result.get(0).getNomeArquivo(), "O nome do arquivo deve ser o esperado");
 		verify(documentoRepository, times(1)).findByProjetoId(projetoId);
 		verifyNoMoreInteractions(documentoRepository);
 	}

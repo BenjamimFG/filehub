@@ -29,7 +29,7 @@ public class ProjetoService {
                                 projeto.getId(),
                                 projeto.getNome(),
                                 projeto.getDataCriacao(),
-                                projeto.getCriador().getId(),
+                                projeto.getCriador() != null ? projeto.getCriador().getId() : null,
                                 projeto.getUsuarios().stream().map(Usuario::getId).toList(),
                                 projeto.getAprovadores().stream().map(Usuario::getId).toList());
         }

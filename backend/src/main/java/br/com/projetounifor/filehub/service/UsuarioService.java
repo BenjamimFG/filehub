@@ -86,7 +86,7 @@ public class UsuarioService {
 		Usuario usuario = new Usuario();
 		usuario.setNome(dto.getNome());
 		usuario.setEmail(dto.getEmail());
-		usuario.setUsername(dto.getUsername().toUpperCase());
+		usuario.setUsername(dto.getUsername());
 		usuario.setSenha(dto.getSenha());
 		usuario.setPerfil(dto.getPerfil());
 		return usuario;

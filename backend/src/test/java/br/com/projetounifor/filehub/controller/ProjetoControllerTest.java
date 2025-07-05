@@ -59,8 +59,7 @@ class ProjetoControllerTest {
 		ProjetoResponseDTO projeto = new ProjetoResponseDTO();
 		projeto.setId(1L);
 		projeto.setNome("Projeto Teste");
-		when(projetoService.criarProjeto(dto))
-				.thenReturn(projeto);
+		when(projetoService.criarProjeto(dto)).thenReturn(projeto);
 
 		String requestBody = objectMapper.writeValueAsString(dto);
 
@@ -115,8 +114,9 @@ class ProjetoControllerTest {
 		ProjetoResponseDTO projeto = new ProjetoResponseDTO();
 		projeto.setId(id);
 		projeto.setNome("Projeto Atualizado");
-		when(projetoService.atualizar(eq(id), dto))
-				.thenReturn(projeto);
+
+		// Usar eq() para ambos os argumentos
+		when(projetoService.atualizar(eq(id), eq(dto))).thenReturn(projeto);
 
 		String requestBody = objectMapper.writeValueAsString(dto);
 
@@ -125,7 +125,8 @@ class ProjetoControllerTest {
 				.andExpect(status().isOk()).andExpect(jsonPath("$.id").value(id))
 				.andExpect(jsonPath("$.nome").value("Projeto Atualizado"));
 
-		verify(projetoService, times(1)).atualizar(eq(id), dto);
+		// Usar eq() para ambos os argumentos na verificação
+		verify(projetoService, times(1)).atualizar(eq(id), eq(dto));
 		verifyNoMoreInteractions(projetoService);
 	}
 

@@ -18,10 +18,10 @@ public class AdminInitializer {
 
     @PostConstruct
     public void init() {
-        if (usuarioRepository.findByUsername("ADMIN").isEmpty()) {
+        if (usuarioRepository.findByUsername("admin").isEmpty()) {
             Usuario admin = new Usuario();
             admin.setNome("Administrador");
-            admin.setUsername("ADMIN");
+            admin.setUsername("admin");
             admin.setEmail("admin@example.com");
             admin.setSenha(passwordEncoder.encode("admin123"));
             admin.setPerfil(Perfil.ADMIN);
